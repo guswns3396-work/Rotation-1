@@ -1,0 +1,6 @@
+proposal/*
+!proposal/*.tex
+!proposal/*.pdf
+
+.vscode/
+__pycache__
