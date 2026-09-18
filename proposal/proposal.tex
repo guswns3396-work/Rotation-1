@@ -1,0 +1,284 @@
+%=======================================================================
+%  COMPASS / PROMPT -- Analytic Memo Template
+%  LaTeX port of COMPASS_Analytic_memo_template.docx
+%
+%  Compile with:  pdflatex COMPASS_Analytic_memo_template.tex
+%  (run twice if you add cross-references)
+%=======================================================================
+\documentclass[11pt,letterpaper]{article}
+
+%----------------------------------------------------------------------
+%  Packages
+%----------------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{amssymb}      % \square for check boxes
+\usepackage{setspace}
+\usepackage[hidelinks]{hyperref}
+
+%----------------------------------------------------------------------
+%  Font.  The Word template uses Calibri.  Carlito is a metric-compatible
+%  clone; if it is not installed we fall back to Helvetica (always
+%  present).  To use real Calibri, compile with XeLaTeX or LuaLaTeX and
+%  swap in the fontspec lines that are commented out below.
+%----------------------------------------------------------------------
+\IfFileExists{carlito.sty}{\usepackage[sfdefault]{carlito}}{%
+  \usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}}
+
+% --- XeLaTeX / LuaLaTeX alternative -----------------------------------
+% \usepackage{fontspec}
+% \setmainfont{Calibri}
+% \setsansfont{Calibri}
+% ----------------------------------------------------------------------
+
+%----------------------------------------------------------------------
+%  Colours taken from the Word theme
+%----------------------------------------------------------------------
+\definecolor{compassblue}{HTML}{0070C0}   % Heading 1 fill  (theme accent1)
+\definecolor{compasslight}{HTML}{BFE4FF}  % Heading 2 fill  (accent1, 33% tint)
+\definecolor{compassdark}{HTML}{00375F}   % Heading 3 text  (accent1, 50% shade)
+
+%----------------------------------------------------------------------
+%  Faux small caps.
+%  The Word headings are small caps with letter spacing.  Calibri and
+%  Helvetica have no true small-caps face, so we synthesise them.
+%  If this ever gets in the way, just redefine:
+%      \renewcommand{\hdg}[1]{\MakeUppercase{#1}}
+%  Keep heading text plain -- no macros or math inside \hdg.
+%----------------------------------------------------------------------
+\newcommand{\hscale}{0.84}
+\newcommand{\vscale}{0.75}
+\newcommand{\hdg}[1]{\fauxscA#1 \relax\relax}
+\def\fauxscA#1 #2\relax{%
+  \fauxscB#1\relax\relax
+  \if\relax#2\relax\else\ \fauxscA#2\relax\fi}
+\def\fauxscB#1#2\relax{%
+  \ifnum`#1>`@\ifnum`#1<`[#1\else
+    \scalebox{\hscale}[\vscale]{\uppercase{#1}}\fi
+  \else#1\fi
+  \ifx\relax#2\relax\else\fauxscB#2\relax\fi}
+
+%----------------------------------------------------------------------
+%  Heading bars
+%  \section     -> white text on a solid blue full-width bar
+%  \subsection  -> black text on a pale blue full-width bar
+%  \subsubsection -> dark blue text above a thin rule (unused by default)
+%----------------------------------------------------------------------
+\newcommand{\barbox}[3]{% {fill}{text colour}{title}
+  \setlength{\fboxsep}{6pt}%
+  \noindent\colorbox{#1}{%
+    \parbox[t]{\dimexpr\textwidth-2\fboxsep\relax}{%
+      \raggedright\color{#2}\strut\hdg{#3}\strut}}}
+
+\newcommand{\sectionbar}[1]{\barbox{compassblue}{white}{#1}}
+\newcommand{\subsectionbar}[1]{\barbox{compasslight}{black}{#1}}
+
+\setcounter{secnumdepth}{0}   % headings are not numbered
+
+\titleformat{\section}[block]{\normalfont\normalsize}{}{0pt}{\sectionbar}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+
+\titleformat{\subsection}[block]{\normalfont\normalsize}{}{0pt}{\subsectionbar}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+
+\titleformat{\subsubsection}[block]
+  {\normalfont\normalsize\color{compassdark}}{}{0pt}{\hdg}
+  [\vspace{-6pt}{\color{compassblue}\rule{\textwidth}{0.5pt}}]
+\titlespacing*{\subsubsection}{0pt}{14pt}{4pt}
+
+%----------------------------------------------------------------------
+%  Body spacing to match the Word document (1.15 line spacing, no indent)
+%----------------------------------------------------------------------
+\setstretch{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\raggedright                  % Word left-aligns body text
+\raggedbottom
+\pagestyle{empty}             % the Word template has no header or footer
+
+%  Fill-in rule:  \blank  or  \blank[4cm]
+\newcommand{\blank}[1][3cm]{\rule[-3pt]{#1}{0.5pt}}
+
+%  Check box
+\newcommand{\cbox}{$\square$\,}
+
+%  Placeholder text -- delete as you fill the memo in
+\newcommand{\placeholder}{Your text here}
+
+\setlist[enumerate]{topsep=4pt,itemsep=4pt,parsep=0pt,leftmargin=*}
+\setlist[itemize]{topsep=4pt,itemsep=4pt,parsep=0pt,leftmargin=*}
+
+%=======================================================================
+\begin{document}
+%=======================================================================
+
+%-----------------------------------------------------------------------
+\section{Title}
+%-----------------------------------------------------------------------
+\placeholder
+
+%-----------------------------------------------------------------------
+\section{Authors}
+%-----------------------------------------------------------------------
+Jack Yang, Andrew Jones
+
+%-----------------------------------------------------------------------
+\section{corresponding author}
+%-----------------------------------------------------------------------
+\begin{enumerate}
+  \item NAME: Jack Yang \\[8pt]
+        EMAIL: yhyunjoo@umich.edu \\[8pt]
+        PHONE: 310-279-0096
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\section{INTRODUCTION and AIMs of the Study}
+%-----------------------------------------------------------------------
+This section provides an overview of the context of the research question,
+including what is known and unknown, and requires a detailed literature
+search. This should contain the following four elements, and will be used
+to construct the Introduction and Discussion sections of the manuscript:
+
+\begin{enumerate}
+  \item Define the problem or research question.
+  \item Describe what is known about the research relative to what you plan
+        to study. For example, what studies have already examined an aspect
+        of this research question, and what remaining questions exist that
+        this research project will address.
+  \item What are the gaps in knowledge that this study will address
+        (usually 2--3).
+  \item Describe the hypotheses of the study questions.
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\section{deliverable type AND DEADLINE (Optional)}
+%-----------------------------------------------------------------------
+\begin{tabular}{@{}l@{\hspace{1em}}l@{\hspace{2.5em}}l@{}}
+  \blank[1.5cm] & Abstract             & Deadline Date: \blank[4cm] \\[10pt]
+  \blank[1.5cm] & Manuscript           & Deadline Date: \blank[4cm] \\[10pt]
+  X & Internal Report      & Deadline Date: Oct 21, 2026 \\[10pt]
+  \blank[1.5cm] & Pilot data for grant & Deadline Date: \blank[4cm] \\[10pt]
+\end{tabular}
+
+\begin{tabular}{@{}l@{\hspace{1em}}l@{}}
+  \blank[1.5cm] & Other (please explain): \blank[6.5cm] \\[10pt]
+                & Deadline Date: \blank[4cm]
+\end{tabular}
+
+%-----------------------------------------------------------------------
+\section{study cohort}
+%-----------------------------------------------------------------------
+\href{https://www.dropbox.com/scl/fi/spwvotejph8oate2o8gll/PROMPT-and-COMPASS-Cohorts.pdf?rlkey=a1qa334mzxthlmv7gvrv1jiot&st=2ajkh0xm&dl=0}%
+     {\color{compassblue}PROMPT and COMPASS Cohorts Diagram}
+
+\medskip
+\begin{tabular}{@{}p{2.2in}p{2.2in}@{}}
+  \cbox RCT PROMPT & \cbox R01 PROMPT   \\[10pt]
+  \cbox COMPASS    & \cbox Full Cohort
+\end{tabular}
+
+\medskip
+\begin{tabular}{@{}p{2.2in}p{2.2in}@{}}
+  $\boxtimes$ 2025 IHS Cohort & $\boxtimes$ 2024 IHS Cohort   \\[10pt]
+\end{tabular}
+
+We will prioritize 2025 IHS cohort, possibly extending to the 2024 cohort if time permits.
+
+%-----------------------------------------------------------------------
+\subsection{DATA TYPES (e.g. Survey, Fitbit, Genomic, Sensorkit)}
+%-----------------------------------------------------------------------
+Survey (for BL characteristics), Fitbit \& Garmin \& HealthKit (for steps/sleep/mood outcomes as well as moderators)
+
+%-----------------------------------------------------------------------
+\subsection{Inclusions (e.g. screening cutoffs, App Assignment)}
+%-----------------------------------------------------------------------
+\placeholder
+
+%-----------------------------------------------------------------------
+\subsection{exclusions (if any)}
+%-----------------------------------------------------------------------
+\placeholder
+
+%-----------------------------------------------------------------------
+\section{VARIABLES}
+%-----------------------------------------------------------------------
+
+\subsection{MAIN EXPOSURE}
+Notification (send vs no send), notification type (sleep vs mood vs steps), notification strategy (therapeutic strategies) 
+
+\subsection{primary outcome}
+\placeholder
+
+\subsection{secondary outcome (s)}
+\placeholder
+
+\subsection{ADDITIONAL COVARIATES (Please Specify if these will be
+  considered as confounders, or Mediating and moderating relationships
+  will also be explored)}
+\placeholder
+
+%-----------------------------------------------------------------------
+\section{STATISTICAL ANALYSIS}
+%-----------------------------------------------------------------------
+\textit{This can be your fully established analysis, or draft prior to
+potential consult with our analysis team.}
+
+Univariate approach:
+
+\vspace{1.5em}
+
+Multivariable approach: We propose to use DR-WCLS
+
+\vspace{1.5em}
+
+%-----------------------------------------------------------------------
+\section{LIMITATIONS OF THE STUDY (Optional)}
+%-----------------------------------------------------------------------
+\placeholder
+
+%-----------------------------------------------------------------------
+\section{tables/ figures}
+%-----------------------------------------------------------------------
+Title, description and shell of tables and mock figures. The following are
+examples for Table 1 and figures.
+
+\begin{enumerate}
+  \item Table 1 -- Characteristics
+\end{enumerate}
+
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X
+                             |>{\centering\arraybackslash}X
+                             |>{\centering\arraybackslash}X
+                             |>{\centering\arraybackslash}X|}
+\hline
+\centering Characteristic
+  & Overall (No. of Patients, \%)
+  & Group 1 (No. Patients, \% Total)
+  & Group 2 (No. Patients, \% Total) \\
+\hline
+Race            &  &  &  \\
+\hline
+\quad White     &  &  &  \\
+\hline
+\quad Black     &  &  &  \\
+\hline
+\quad Others    &  &  &  \\
+\hline
+Age             &  &  &  \\
+\hline
+\ldots          &  & \ldots & \ldots \\
+\hline
+\end{tabularx}
+\renewcommand{\arraystretch}{1}
+
+%  Add further tables and mock figures below.
+
+\end{document}
