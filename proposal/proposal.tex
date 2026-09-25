@@ -122,7 +122,7 @@
 %-----------------------------------------------------------------------
 \section{Title}
 %-----------------------------------------------------------------------
-\placeholder
+Estimating Overall and Heterogeneous Effects of Digital Health Messages
 
 %-----------------------------------------------------------------------
 \section{Authors}
@@ -199,12 +199,12 @@ Survey (for BL characteristics), Fitbit \& Garmin \& HealthKit (for steps/sleep/
 %-----------------------------------------------------------------------
 \subsection{Inclusions (e.g. screening cutoffs, App Assignment)}
 %-----------------------------------------------------------------------
-\placeholder
+N/A
 
 %-----------------------------------------------------------------------
 \subsection{exclusions (if any)}
 %-----------------------------------------------------------------------
-\placeholder
+We may exclude those who have too much missing data.
 
 %-----------------------------------------------------------------------
 \section{VARIABLES}
@@ -234,14 +234,22 @@ Univariate approach:
 
 \vspace{1.5em}
 
-Multivariable approach: We propose to use DR-WCLS
+Multivariable approach:
+
+Our proposed approach is to use DR-WCLS to to estimate the global population average effect.
+Then, the DR-WCLS output will allow us to regress moderators on individual pseudo-outcomes to estimate the individual baseline treatment effects.
+We will then compute the significance of effects and compare significance of effects across individuals with null distribution derived from permuting the randomization to determine if the effect is indeed significant overall across individuals.
+Looking at the distribution of effects, we will determine heterogeneity by fitting Gaussian Mixture Models.
+If the effect across individuals are indeed heterogeneous, we will analyze for what individuals the effect is positive vs negative using baseline characteristics.
 
 \vspace{1.5em}
 
 %-----------------------------------------------------------------------
 \section{LIMITATIONS OF THE STUDY (Optional)}
 %-----------------------------------------------------------------------
-\placeholder
+Preprocessing method for timeseries variable.
+No clear distinction between users of each device type.
+Harmonization across device types ad hoc.
 
 %-----------------------------------------------------------------------
 \section{tables/ figures}
@@ -257,24 +265,26 @@ examples for Table 1 and figures.
 \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X
                              |>{\centering\arraybackslash}X
                              |>{\centering\arraybackslash}X
+                             |>{\centering\arraybackslash}X
                              |>{\centering\arraybackslash}X|}
 \hline
 \centering Characteristic
   & Overall (No. of Patients, \%)
-  & Group 1 (No. Patients, \% Total)
-  & Group 2 (No. Patients, \% Total) \\
+  & Garmin (No. Patients, \% Total)
+  & HealthKit (No. Patients, \% Total)
+  & Fitbit (No. Patients, \% Total) \\
 \hline
-Race            &  &  &  \\
+Race            &  &  &  &  \\
 \hline
-\quad White     &  &  &  \\
+\quad White     &  &  &  &  \\
 \hline
-\quad Black     &  &  &  \\
+\quad Black     &  &  &  &  \\
 \hline
-\quad Others    &  &  &  \\
+\quad Others    &  &  &  &  \\
 \hline
-Age             &  &  &  \\
+Age             &  &  &  &  \\
 \hline
-\ldots          &  & \ldots & \ldots \\
+\ldots          & \ldots & \ldots & \ldots & \ldots \\
 \hline
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
