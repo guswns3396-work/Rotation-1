@@ -45,25 +45,7 @@
 \definecolor{compasslight}{HTML}{BFE4FF}  % Heading 2 fill  (accent1, 33% tint)
 \definecolor{compassdark}{HTML}{00375F}   % Heading 3 text  (accent1, 50% shade)
 
-%----------------------------------------------------------------------
-%  Faux small caps.
-%  The Word headings are small caps with letter spacing.  Calibri and
-%  Helvetica have no true small-caps face, so we synthesise them.
-%  If this ever gets in the way, just redefine:
-%      \renewcommand{\hdg}[1]{\MakeUppercase{#1}}
-%  Keep heading text plain -- no macros or math inside \hdg.
-%----------------------------------------------------------------------
-\newcommand{\hscale}{0.84}
-\newcommand{\vscale}{0.75}
-\newcommand{\hdg}[1]{\fauxscA#1 \relax\relax}
-\def\fauxscA#1 #2\relax{%
-  \fauxscB#1\relax\relax
-  \if\relax#2\relax\else\ \fauxscA#2\relax\fi}
-\def\fauxscB#1#2\relax{%
-  \ifnum`#1>`@\ifnum`#1<`[#1\else
-    \scalebox{\hscale}[\vscale]{\uppercase{#1}}\fi
-  \else#1\fi
-  \ifx\relax#2\relax\else\fauxscB#2\relax\fi}
+\newcommand{\hdg}[1]{\MakeUppercase{#1}}
 
 %----------------------------------------------------------------------
 %  Heading bars
@@ -122,12 +104,13 @@
 %-----------------------------------------------------------------------
 \section{Title}
 %-----------------------------------------------------------------------
-Estimating Overall and Heterogeneous Effects of Digital Health Messages
+Overall and Heterogeneous Effects of Digital Health Messages on Sleep, Activity, and Mood
+in Medical Interns
 
 %-----------------------------------------------------------------------
 \section{Authors}
 %-----------------------------------------------------------------------
-Jack Yang, Andrew Jones
+Jack Yang, Andrew Jones, Srijan Sen
 
 %-----------------------------------------------------------------------
 \section{corresponding author}
@@ -157,6 +140,11 @@ to construct the Introduction and Discussion sections of the manuscript:
   \item Describe the hypotheses of the study questions.
 \end{enumerate}
 
+
+Although mobile health push notifications aim to improve mood, sleep, and activity, individual responsiveness can vary substantially.
+NeCamp et al. \cite{NeCamp2020} evaluated notification effects in the 2018 Intern Health Study using Weighted and Centered Least-Squares (WCLS), but WCLS averages effects across participants and decision points, causing opposing individual responses to cancel out and masking true heterogeneity \cite{Qian2022}.
+Furthermore, the trial design has since expanded to deploy diverse therapeutic notification strategies whose individual-level efficacy remains unexamined.
+Leveraging DR-WCLS pseudo-outcomes \cite{Shi2025}, this study addresses these gaps by evaluating whether distinct therapeutic strategies exert causal excursion effects on proximal outcomes, testing whether individual treatment responsiveness exhibits significant heterogeneity across participants, and identifying baseline characteristics that predict positive versus negative intervention responsiveness.
 %-----------------------------------------------------------------------
 \section{deliverable type AND DEADLINE (Optional)}
 %-----------------------------------------------------------------------
@@ -204,25 +192,29 @@ N/A
 %-----------------------------------------------------------------------
 \subsection{exclusions (if any)}
 %-----------------------------------------------------------------------
-We may exclude those who have too much missing data.
+To ensure reliable estimation of participant-level treatment effects, participants with excessive missingness with respect to proximal outcome or moderators will be excluded prior to analysis based on a predefined completion threshold.
+For retained participants, sporadic decision-point level missingness will be addressed through the observation weighting in the DR-WCLS estimation framework.
 
 %-----------------------------------------------------------------------
 \section{VARIABLES}
 %-----------------------------------------------------------------------
 
 \subsection{MAIN EXPOSURE}
-Notification (send vs no send), notification type (sleep vs mood vs steps), notification strategy (therapeutic strategies) 
+Notification (sending notification vs not sending notification),
+notification type (sleep vs mood vs activity),
+notification strategy (therapeutic strategies)
 
 \subsection{primary outcome}
-\placeholder
+Self-reported mood, sleep duration, and step count
 
 \subsection{secondary outcome (s)}
-\placeholder
+N/A
 
 \subsection{ADDITIONAL COVARIATES (Please Specify if these will be
   considered as confounders, or Mediating and moderating relationships
   will also be explored)}
-\placeholder
+Additional covariates consist of dynamic, time-varying contextual variables measured at each decision point (e.g., previous night's sleep duration).
+These variables will be evaluated as candidate moderators to assess contextual heterogeneity in treatment responsiveness and determine how real-time user state affects the intervention effect on the proximal outcome.
 
 %-----------------------------------------------------------------------
 \section{STATISTICAL ANALYSIS}
@@ -236,20 +228,25 @@ Univariate approach:
 
 Multivariable approach:
 
-Our proposed approach is to use DR-WCLS to to estimate the global population average effect.
-Then, the DR-WCLS output will allow us to regress moderators on individual pseudo-outcomes to estimate the individual baseline treatment effects.
-We will then compute the significance of effects and compare significance of effects across individuals with null distribution derived from permuting the randomization to determine if the effect is indeed significant overall across individuals.
-Looking at the distribution of effects, we will determine heterogeneity by fitting Gaussian Mixture Models.
-If the effect across individuals are indeed heterogeneous, we will analyze for what individuals the effect is positive vs negative using baseline characteristics.
+We evaluate overall treatment efficacy and individual response heterogeneity using a multi-stage causal inference framework.
+We begin by applying Doubly Robust Weighted and Centered Least Squares to estimate the overall marginal causal excursion effect across all participants and decision points.
+Next, using the per-decision-point doubly robust pseudo-outcomes generated by this procedure, we fit participant-specific regressions to estimate individual baseline treatment effects.
+To establish whether these individual treatment effects are statistically significant overall across the population, we compare observed effect magnitudes against a randomization null distribution generated by permuting treatment assignments under the design probabilities.
+We then inspect the distribution of estimated participant effects and fit Gaussian Mixture Models to evaluate response heterogeneity and identify distinct responder subgroups.
+Finally, if significant heterogeneity is confirmed, we regress participant baseline characteristics against individual treatment effects to determine which baseline profiles predict positive versus negative intervention responsiveness.
+
+All analyses will be conducted across the complete study sample as well as stratified by participant device type to evaluate potential hardware-level variability in treatment estimates.
 
 \vspace{1.5em}
 
 %-----------------------------------------------------------------------
 \section{LIMITATIONS OF THE STUDY (Optional)}
 %-----------------------------------------------------------------------
-Preprocessing method for timeseries variable.
-No clear distinction between users of each device type.
-Harmonization across device types ad hoc.
+A primary limitation of this study concerns the preprocessing and harmonization of intensive time-series data across heterogeneous commercial devices.
+Because participants were not explicitly differentiated by device model, establishing uniform measurement baselines across hardware platforms proved challenging.
+Consequently, cross-device data harmonization relied on ad-hoc alignment procedures, which may introduce calibration noise or unmeasured sensor variance.
+On the other hand, device stratification will reduce the power of the analysis.
+Furthermore, the sensitivity of causal estimates to specific time-series preprocessing choices remains a potential source of analytical variability.
 
 %-----------------------------------------------------------------------
 \section{tables/ figures}
@@ -259,36 +256,80 @@ examples for Table 1 and figures.
 
 \begin{enumerate}
   \item Table 1 -- Characteristics
-\end{enumerate}
+  \vspace{1.5em}
 
-\renewcommand{\arraystretch}{1.4}
-\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X
-                             |>{\centering\arraybackslash}X
-                             |>{\centering\arraybackslash}X
-                             |>{\centering\arraybackslash}X
-                             |>{\centering\arraybackslash}X|}
-\hline
-\centering Characteristic
-  & Overall (No. of Patients, \%)
-  & Garmin (No. Patients, \% Total)
-  & HealthKit (No. Patients, \% Total)
-  & Fitbit (No. Patients, \% Total) \\
-\hline
-Race            &  &  &  &  \\
-\hline
-\quad White     &  &  &  &  \\
-\hline
-\quad Black     &  &  &  &  \\
-\hline
-\quad Others    &  &  &  &  \\
-\hline
-Age             &  &  &  &  \\
-\hline
-\ldots          & \ldots & \ldots & \ldots & \ldots \\
-\hline
-\end{tabularx}
-\renewcommand{\arraystretch}{1}
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X
+                              |>{\centering\arraybackslash}X
+                              |>{\centering\arraybackslash}X
+                              |>{\centering\arraybackslash}X
+                              |>{\centering\arraybackslash}X|}
+  \hline
+  \centering Characteristic
+    & Overall (No. of Patients, \%)
+    & Garmin (No. Patients, \% Total)
+    & HealthKit (No. Patients, \% Total)
+    & Fitbit (No. Patients, \% Total) \\
+  \hline
+  Race            &  &  &  &  \\
+  \hline
+  \quad White     &  &  &  &  \\
+  \hline
+  \quad Black     &  &  &  &  \\
+  \hline
+  \quad Others    &  &  &  &  \\
+  \hline
+  Age             &  &  &  &  \\
+  \hline
+  \ldots          & \ldots & \ldots & \ldots & \ldots \\
+  \hline
+  \end{tabularx}
+  \renewcommand{\arraystretch}{1}
 
 %  Add further tables and mock figures below.
+
+  \item Figure 1 -- 2025 IHS Study Design
+  \includegraphics[width=\linewidth]{assets/study_design_2025.png}
+
+  \item Figure 2 -- 2024 IHS Study Design
+  \includegraphics[width=\linewidth]{assets/study_design_2024.png}
+
+  \item Table 2 -- Table of Cumulative Magnitude of Effects and P-Values
+  \vspace{1.5em}
+  
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X
+                              |>{\centering\arraybackslash}X
+                              |>{\centering\arraybackslash}X|}
+  \hline
+  \centering Intervention
+    & Cumulative Magnitude of Effect
+    & P-Value \\
+  \hline
+  Notification            &  &  \\
+  \hline
+  \quad Mindfulness       &  &  \\
+  \hline
+  \quad \ldots            & \ldots & \ldots \\
+  \hline
+  No Notification         &  &  \\
+  \hline
+  \end{tabularx}
+  \renewcommand{\arraystretch}{1}
+    
+
+  \item Figure 3 -- Distribution of Effects
+  
+  \includegraphics[width=0.4\linewidth]{assets/effect_distribution_example.png}
+
+  \item Figure 4 -- Effect vs Baseline Characteristic
+  
+  \includegraphics[width=0.4\linewidth]{assets/effect_vs_characteristic_example.png}
+\end{enumerate}
+
+
+% References
+\bibliographystyle{plain}
+\bibliography{proposal}
 
 \end{document}
