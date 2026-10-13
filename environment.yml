@@ -1,15 +1,27 @@
 name: rot1
 channels:
-  - defaults
+  - conda-forge
+  - nodefaults
 dependencies:
   - python
   - pandas
   - seaborn
   - scikit-learn
   - ipykernel
-  - r-base
-  - r-irkernel
   - pyyaml
+  - r-base=4.5
+  - r-irkernel
+  - r-remotes
   - r-yaml
   - r-here
-  - r-readr
+  # MRTpostInfLASSO imports
+  - r-reticulate
+  - r-doparallel
+  - r-dplyr
+  - r-foreach
+  - r-ranger
+  - r-xgboost
+  - r-zoo
+  - r-modelr
+  - r-glmnet
+  - r-tidyverse
