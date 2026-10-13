@@ -9,3 +9,4 @@ dependencies:
   - ipykernel
   - r-base
   - r-irkernel
+  - pyyaml
