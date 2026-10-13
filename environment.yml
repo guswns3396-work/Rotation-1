@@ -11,3 +11,4 @@ dependencies:
   - r-irkernel
   - pyyaml
   - r-yaml
+  - r-here
