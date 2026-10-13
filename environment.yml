@@ -7,3 +7,5 @@ dependencies:
   - seaborn
   - scikit-learn
   - ipykernel
+  - r-base
+  - r-irkernel
