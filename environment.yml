@@ -1,0 +1,9 @@
+name: rot1
+channels:
+  - defaults
+dependencies:
+  - python
+  - pandas
+  - seaborn
+  - scikit-learn
+  - ipykernel
