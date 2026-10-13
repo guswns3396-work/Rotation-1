@@ -10,3 +10,4 @@ dependencies:
   - r-base
   - r-irkernel
   - pyyaml
+  - r-yaml
