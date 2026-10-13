@@ -6,4 +6,4 @@ proposal/*
 
 .vscode/
 __pycache__
-config.py
+config.yml
