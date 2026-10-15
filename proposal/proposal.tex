@@ -22,6 +22,13 @@
 \usepackage{amssymb}      % \square for check boxes
 \usepackage{setspace}
 \usepackage[hidelinks]{hyperref}
+\usepackage[
+    backend=biber,
+    style=numeric,
+    sorting=none,
+    sortcites=true % Automatically sorts multiple keys in increasing order
+]{biblatex}
+\addbibresource{proposal.bib}
 
 %----------------------------------------------------------------------
 %  Font.  The Word template uses Calibri.  Carlito is a metric-compatible
@@ -104,8 +111,8 @@
 %-----------------------------------------------------------------------
 \section{Title}
 %-----------------------------------------------------------------------
-Overall and Heterogeneous Effects of Digital Health Messages on Sleep, Activity, and Mood
-in Medical Interns
+Overall and Heterogeneous Effects of Psychotherapy-Informed Push Notifications
+on Mood, Sleep, and Activity in Medical Interns
 
 %-----------------------------------------------------------------------
 \section{Authors}
@@ -140,11 +147,102 @@ to construct the Introduction and Discussion sections of the manuscript:
   \item Describe the hypotheses of the study questions.
 \end{enumerate}
 
+% [importance of depression] [higher rates among interns]
+Depression is among the leading contributors to the global burden of disease
+\cite{whiteford_global_2013, noauthor_global_2022} and carries a substantial
+economic cost \cite{greenberg_economic_2015}. Chronic occupational stress is a
+well-documented contributor to depressive disorders \cite{tennant_work-related_2001},
+and physicians in training are particularly exposed. Depression and depressive
+symptoms affect roughly one in four medical students
+\cite{rotenstein_prevalence_2016, dyrbye_systematic_2006}, and a pooled 28.8\%
+of resident physicians, with a median absolute increase in depressive symptoms
+of 15.8\% at the onset of residency training \cite{mata_prevalence_2015}.
+Demanding and unpredictable schedules further limit interns' access to
+traditional mental health services \cite{necamp_assessing_2020}.
 
-Although mobile health push notifications aim to improve mood, sleep, and activity, individual responsiveness can vary substantially.
-NeCamp et al. \cite{NeCamp2020} evaluated notification effects in the 2018 Intern Health Study using Weighted and Centered Least-Squares (WCLS), but WCLS averages effects across participants and decision points, causing opposing individual responses to cancel out and masking true heterogeneity \cite{Qian2022}.
-Furthermore, the trial design has since expanded to deploy diverse therapeutic notification strategies whose individual-level efficacy remains unexamined.
-Leveraging DR-WCLS pseudo-outcomes \cite{Shi2025}, this study addresses these gaps by evaluating whether distinct therapeutic strategies exert causal excursion effects on proximal outcomes, testing whether individual treatment responsiveness exhibits significant heterogeneity across participants, and identifying baseline characteristics that predict positive versus negative intervention responsiveness.
+% [potential of mobile health] [why JITAIs are useful]
+Mobile health (mHealth) interventions offer a way to deliver support within daily
+life. Text-message and handheld-device interventions have produced positive
+behavior change across a range of health domains
+\cite{fjeldsoe_behavior_2009, de_leon_characterizing_2014, patrick_text_2009,
+franklin_randomized_2006, king_promoting_2008}, and smartphone-based mental health
+interventions reduce depressive symptoms \cite{firth_efficacy_2017,
+linardon_efficacy_2019}. Yet sustained engagement is difficult: treatment burden
+and fatigue undermine adherence \cite{heckman_treatment_2015}, users frequently
+disengage \cite{zhang_factors_2017}, and the timing and frequency of prompts shape
+how they are received \cite{morrison_effect_2017}. Just-in-time adaptive
+interventions (JITAIs) address these challenges by tailoring the type, timing,
+and intensity of support to an individual's changing state
+\cite{nahum-shani_just--time_2016, heron_ecological_2010, riley_health_2011,
+wang_just---moment_2019}. Micro-randomized trials (MRTs), which repeatedly
+randomize intervention delivery within each participant, provide the data needed
+to determine when and for whom such components are effective
+\cite{qian_micro-randomized_2021, boruvka_assessing_2017}.
+
+% [overview of therapeutic strategies] [heterogeneity of their effects]
+The content of mHealth messages can draw on several established therapeutic
+strategies, including cognitive therapy \cite{beck_cognitive_2024,
+linardon_efficacy_2019}, behavioral activation \cite{lewinsohn_behavioral_1974,
+dimidjian_randomized_2006}, mindfulness \cite{teasdale_prevention_2000,
+economides_improvements_2018}, motivational interviewing
+\cite{rubak_motivational_2005, shingleton_technology-delivered_2016}, and
+distanced self-talk \cite{kross_self-distancing_2017}. The benefits of these
+strategies are not uniform across individuals. Behavioral activation
+outperformed cognitive therapy among more severely depressed patients
+\cite{dimidjian_randomized_2006}; mindfulness-based cognitive therapy prevented
+relapse only among patients with three or more prior episodes
+\cite{teasdale_prevention_2000}; and when delivered by smartphone, behavioral
+activation was more effective for patients with higher initial severity while
+mindfulness was more effective for those with lower severity
+\cite{ly_behavioural_2014}. Among medical interns specifically, the effects of
+push notifications differ across subgroups \cite{xu_uncovering_2023} and depend
+on recent mood, activity, and sleep \cite{necamp_assessing_2020}.
+
+% [introduce IHS] [prior work used WCLS, which averages effects]
+The Intern Health Study (IHS) follows first-year residents throughout
+internship and embeds MRTs of push notifications targeting mood, physical
+activity, and sleep. Analyzing a 6-month MRT of 1{,}565 interns with the weighted
+and centered least squares (WCLS) estimator \cite{boruvka_assessing_2017}, NeCamp
+et al.\ found that notification effects were moderated by the previous week's
+mood, step count, and sleep \cite{necamp_assessing_2020}. However, WCLS estimates
+causal excursion effects averaged across participants and decision points,
+conditional on a prespecified set of moderators. Heterogeneity that these
+moderators do not capture is averaged away, so opposing individual responses can
+cancel and mask meaningful variation in who benefits. Moreover, subsequent IHS
+cohorts deliver messages based on distinct therapeutic strategies whose
+individual-level efficacy has not been examined.
+
+% [DR-WCLS as a method to explore heterogeneity]
+The doubly robust WCLS (DR-WCLS) estimator \cite{shi_meta-learning_2025} is well
+suited to this problem. DR-WCLS constructs a doubly robust pseudo-outcome at
+each decision point, which, because randomization probabilities are known in an
+MRT, provides an unbiased signal of the treatment effect at that decision.
+Unlike WCLS, which yields only population-averaged effects, these pseudo-outcomes
+can be aggregated within each participant to estimate individual-level effects,
+allowing us to test directly whether responsiveness varies across interns.
+Leveraging this, we (1) estimate the causal excursion effects of distinct
+therapeutic notification strategies on proximal mood, sleep, and activity;
+(2) test whether treatment responsiveness varies significantly across
+participants; and (3) identify baseline characteristics that predict positive
+versus negative responsiveness.
+
+% [hypotheses]
+We hypothesize that:
+\begin{enumerate}
+  \item[H1.] Sending a notification improves the proximal outcome in its own
+        domain (mood, sleep, or activity) relative to sending no notification
+        \cite{necamp_assessing_2020}.
+  \item[H2.] Effects on the proximal outcome differ by therapeutic strategy.
+  \item[H3.] Treatment responsiveness varies across participants beyond what
+        would be expected by chance under the randomization design.
+  \item[H4.] Baseline depressive severity, measured by the PHQ-9, moderates the
+        effect of strategy, with behavioral strategy relatively more effective
+        at higher severity and mindfulness relatively more effective at lower
+        severity \cite{dimidjian_randomized_2006, ly_behavioural_2014}.
+  \item[H5.] Mindfulness messages are more effective for interns with a history
+        of depression \cite{teasdale_prevention_2000}.
+\end{enumerate}
+
 %-----------------------------------------------------------------------
 \section{deliverable type AND DEADLINE (Optional)}
 %-----------------------------------------------------------------------
@@ -177,7 +275,8 @@ Leveraging DR-WCLS pseudo-outcomes \cite{Shi2025}, this study addresses these ga
   $\boxtimes$ 2025 IHS Cohort & $\boxtimes$ 2024 IHS Cohort   \\[10pt]
 \end{tabular}
 
-We will prioritize 2025 IHS cohort, possibly extending to the 2024 cohort if time permits.
+We will prioritize 2024 IHS cohort, possibly extending to the 2025 cohort if time permits,
+or additional sample size is needed for sufficient power.
 
 %-----------------------------------------------------------------------
 \subsection{DATA TYPES (e.g. Survey, Fitbit, Genomic, Sensorkit)}
@@ -213,8 +312,8 @@ N/A
 \subsection{ADDITIONAL COVARIATES (Please Specify if these will be
   considered as confounders, or Mediating and moderating relationships
   will also be explored)}
-Additional covariates consist of dynamic, time-varying contextual variables measured at each decision point (e.g., previous night's sleep duration).
-These variables will be evaluated as candidate moderators to assess contextual heterogeneity in treatment responsiveness and determine how real-time user state affects the intervention effect on the proximal outcome.
+Additional covariates consist of dynamic, time-varying contextual variables measured at each decision point (e.g., previous night's sleep duration) as well as baseline characteristics.
+These variables will be evaluated as candidate moderators to assess contextual heterogeneity in treatment responsiveness and determine how real-time user state and characteristics affect the intervention effect on the proximal outcome.
 
 %-----------------------------------------------------------------------
 \section{STATISTICAL ANALYSIS}
@@ -230,7 +329,7 @@ Multivariable approach:
 
 We evaluate overall treatment efficacy and individual response heterogeneity using a multi-stage causal inference framework.
 We begin by applying Doubly Robust Weighted and Centered Least Squares to estimate the overall marginal causal excursion effect across all participants and decision points.
-Next, using the per-decision-point doubly robust pseudo-outcomes generated by this procedure, we fit participant-specific regressions to estimate individual baseline treatment effects.
+Next, using the per-decision-point doubly robust pseudo-outcomes generated by this procedure, we fit participant-specific regressions using time-varying contextual variables to estimate individual baseline treatment effects.
 To establish whether these individual treatment effects are statistically significant overall across the population, we compare observed effect magnitudes against a randomization null distribution generated by permuting treatment assignments under the design probabilities.
 We then inspect the distribution of estimated participant effects and fit Gaussian Mixture Models to evaluate response heterogeneity and identify distinct responder subgroups.
 Finally, if significant heterogeneity is confirmed, we regress participant baseline characteristics against individual treatment effects to determine which baseline profiles predict positive versus negative intervention responsiveness.
@@ -329,7 +428,7 @@ examples for Table 1 and figures.
 
 
 % References
-\bibliographystyle{plain}
-\bibliography{proposal}
+\printbibliography
+
 
 \end{document}
