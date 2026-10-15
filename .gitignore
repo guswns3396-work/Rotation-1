@@ -1,6 +1,8 @@
 proposal/*
 !proposal/*.tex
 !proposal/*.pdf
+!proposal/*.bib
+!proposal/assets/
 
 .vscode/
 __pycache__
