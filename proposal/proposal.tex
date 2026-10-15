@@ -1,0 +1,434 @@
+%=======================================================================
+%  COMPASS / PROMPT -- Analytic Memo Template
+%  LaTeX port of COMPASS_Analytic_memo_template.docx
+%
+%  Compile with:  pdflatex COMPASS_Analytic_memo_template.tex
+%  (run twice if you add cross-references)
+%=======================================================================
+\documentclass[11pt,letterpaper]{article}
+
+%----------------------------------------------------------------------
+%  Packages
+%----------------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{amssymb}      % \square for check boxes
+\usepackage{setspace}
+\usepackage[hidelinks]{hyperref}
+\usepackage[
+    backend=biber,
+    style=numeric,
+    sorting=none,
+    sortcites=true % Automatically sorts multiple keys in increasing order
+]{biblatex}
+\addbibresource{proposal.bib}
+
+%----------------------------------------------------------------------
+%  Font.  The Word template uses Calibri.  Carlito is a metric-compatible
+%  clone; if it is not installed we fall back to Helvetica (always
+%  present).  To use real Calibri, compile with XeLaTeX or LuaLaTeX and
+%  swap in the fontspec lines that are commented out below.
+%----------------------------------------------------------------------
+\IfFileExists{carlito.sty}{\usepackage[sfdefault]{carlito}}{%
+  \usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}}
+
+% --- XeLaTeX / LuaLaTeX alternative -----------------------------------
+% \usepackage{fontspec}
+% \setmainfont{Calibri}
+% \setsansfont{Calibri}
+% ----------------------------------------------------------------------
+
+%----------------------------------------------------------------------
+%  Colours taken from the Word theme
+%----------------------------------------------------------------------
+\definecolor{compassblue}{HTML}{0070C0}   % Heading 1 fill  (theme accent1)
+\definecolor{compasslight}{HTML}{BFE4FF}  % Heading 2 fill  (accent1, 33% tint)
+\definecolor{compassdark}{HTML}{00375F}   % Heading 3 text  (accent1, 50% shade)
+
+\newcommand{\hdg}[1]{\MakeUppercase{#1}}
+
+%----------------------------------------------------------------------
+%  Heading bars
+%  \section     -> white text on a solid blue full-width bar
+%  \subsection  -> black text on a pale blue full-width bar
+%  \subsubsection -> dark blue text above a thin rule (unused by default)
+%----------------------------------------------------------------------
+\newcommand{\barbox}[3]{% {fill}{text colour}{title}
+  \setlength{\fboxsep}{6pt}%
+  \noindent\colorbox{#1}{%
+    \parbox[t]{\dimexpr\textwidth-2\fboxsep\relax}{%
+      \raggedright\color{#2}\strut\hdg{#3}\strut}}}
+
+\newcommand{\sectionbar}[1]{\barbox{compassblue}{white}{#1}}
+\newcommand{\subsectionbar}[1]{\barbox{compasslight}{black}{#1}}
+
+\setcounter{secnumdepth}{0}   % headings are not numbered
+
+\titleformat{\section}[block]{\normalfont\normalsize}{}{0pt}{\sectionbar}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+
+\titleformat{\subsection}[block]{\normalfont\normalsize}{}{0pt}{\subsectionbar}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+
+\titleformat{\subsubsection}[block]
+  {\normalfont\normalsize\color{compassdark}}{}{0pt}{\hdg}
+  [\vspace{-6pt}{\color{compassblue}\rule{\textwidth}{0.5pt}}]
+\titlespacing*{\subsubsection}{0pt}{14pt}{4pt}
+
+%----------------------------------------------------------------------
+%  Body spacing to match the Word document (1.15 line spacing, no indent)
+%----------------------------------------------------------------------
+\setstretch{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\raggedright                  % Word left-aligns body text
+\raggedbottom
+\pagestyle{empty}             % the Word template has no header or footer
+
+%  Fill-in rule:  \blank  or  \blank[4cm]
+\newcommand{\blank}[1][3cm]{\rule[-3pt]{#1}{0.5pt}}
+
+%  Check box
+\newcommand{\cbox}{$\square$\,}
+
+%  Placeholder text -- delete as you fill the memo in
+\newcommand{\placeholder}{Your text here}
+
+\setlist[enumerate]{topsep=4pt,itemsep=4pt,parsep=0pt,leftmargin=*}
+\setlist[itemize]{topsep=4pt,itemsep=4pt,parsep=0pt,leftmargin=*}
+
+%=======================================================================
+\begin{document}
+%=======================================================================
+
+%-----------------------------------------------------------------------
+\section{Title}
+%-----------------------------------------------------------------------
+Overall and Heterogeneous Effects of Psychotherapy-Informed Push Notifications
+on Mood, Sleep, and Activity in Medical Interns
+
+%-----------------------------------------------------------------------
+\section{Authors}
+%-----------------------------------------------------------------------
+Jack Yang, Andrew Jones, Srijan Sen
+
+%-----------------------------------------------------------------------
+\section{corresponding author}
+%-----------------------------------------------------------------------
+\begin{enumerate}
+  \item NAME: Jack Yang \\[8pt]
+        EMAIL: yhyunjoo@umich.edu \\[8pt]
+        PHONE: 310-279-0096
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\section{INTRODUCTION and AIMs of the Study}
+%-----------------------------------------------------------------------
+This section provides an overview of the context of the research question,
+including what is known and unknown, and requires a detailed literature
+search. This should contain the following four elements, and will be used
+to construct the Introduction and Discussion sections of the manuscript:
+
+\begin{enumerate}
+  \item Define the problem or research question.
+  \item Describe what is known about the research relative to what you plan
+        to study. For example, what studies have already examined an aspect
+        of this research question, and what remaining questions exist that
+        this research project will address.
+  \item What are the gaps in knowledge that this study will address
+        (usually 2--3).
+  \item Describe the hypotheses of the study questions.
+\end{enumerate}
+
+% [importance of depression] [higher rates among interns]
+Depression is among the leading contributors to the global burden of disease
+\cite{whiteford_global_2013, noauthor_global_2022} and carries a substantial
+economic cost \cite{greenberg_economic_2015}. Chronic occupational stress is a
+well-documented contributor to depressive disorders \cite{tennant_work-related_2001},
+and physicians in training are particularly exposed. Depression and depressive
+symptoms affect roughly one in four medical students
+\cite{rotenstein_prevalence_2016, dyrbye_systematic_2006}, and a pooled 28.8\%
+of resident physicians, with a median absolute increase in depressive symptoms
+of 15.8\% at the onset of residency training \cite{mata_prevalence_2015}.
+Demanding and unpredictable schedules further limit interns' access to
+traditional mental health services \cite{necamp_assessing_2020}.
+
+% [potential of mobile health] [why JITAIs are useful]
+Mobile health (mHealth) interventions offer a way to deliver support within daily
+life. Text-message and handheld-device interventions have produced positive
+behavior change across a range of health domains
+\cite{fjeldsoe_behavior_2009, de_leon_characterizing_2014, patrick_text_2009,
+franklin_randomized_2006, king_promoting_2008}, and smartphone-based mental health
+interventions reduce depressive symptoms \cite{firth_efficacy_2017,
+linardon_efficacy_2019}. Yet sustained engagement is difficult: treatment burden
+and fatigue undermine adherence \cite{heckman_treatment_2015}, users frequently
+disengage \cite{zhang_factors_2017}, and the timing and frequency of prompts shape
+how they are received \cite{morrison_effect_2017}. Just-in-time adaptive
+interventions (JITAIs) address these challenges by tailoring the type, timing,
+and intensity of support to an individual's changing state
+\cite{nahum-shani_just--time_2016, heron_ecological_2010, riley_health_2011,
+wang_just---moment_2019}. Micro-randomized trials (MRTs), which repeatedly
+randomize intervention delivery within each participant, provide the data needed
+to determine when and for whom such components are effective
+\cite{qian_micro-randomized_2021, boruvka_assessing_2017}.
+
+% [overview of therapeutic strategies] [heterogeneity of their effects]
+The content of mHealth messages can draw on several established therapeutic
+strategies, including cognitive therapy \cite{beck_cognitive_2024,
+linardon_efficacy_2019}, behavioral activation \cite{lewinsohn_behavioral_1974,
+dimidjian_randomized_2006}, mindfulness \cite{teasdale_prevention_2000,
+economides_improvements_2018}, motivational interviewing
+\cite{rubak_motivational_2005, shingleton_technology-delivered_2016}, and
+distanced self-talk \cite{kross_self-distancing_2017}. The benefits of these
+strategies are not uniform across individuals. Behavioral activation
+outperformed cognitive therapy among more severely depressed patients
+\cite{dimidjian_randomized_2006}; mindfulness-based cognitive therapy prevented
+relapse only among patients with three or more prior episodes
+\cite{teasdale_prevention_2000}; and when delivered by smartphone, behavioral
+activation was more effective for patients with higher initial severity while
+mindfulness was more effective for those with lower severity
+\cite{ly_behavioural_2014}. Among medical interns specifically, the effects of
+push notifications differ across subgroups \cite{xu_uncovering_2023} and depend
+on recent mood, activity, and sleep \cite{necamp_assessing_2020}.
+
+% [introduce IHS] [prior work used WCLS, which averages effects]
+The Intern Health Study (IHS) follows first-year residents throughout
+internship and embeds MRTs of push notifications targeting mood, physical
+activity, and sleep. Analyzing a 6-month MRT of 1{,}565 interns with the weighted
+and centered least squares (WCLS) estimator \cite{boruvka_assessing_2017}, NeCamp
+et al.\ found that notification effects were moderated by the previous week's
+mood, step count, and sleep \cite{necamp_assessing_2020}. However, WCLS estimates
+causal excursion effects averaged across participants and decision points,
+conditional on a prespecified set of moderators. Heterogeneity that these
+moderators do not capture is averaged away, so opposing individual responses can
+cancel and mask meaningful variation in who benefits. Moreover, subsequent IHS
+cohorts deliver messages based on distinct therapeutic strategies whose
+individual-level efficacy has not been examined.
+
+% [DR-WCLS as a method to explore heterogeneity]
+The doubly robust WCLS (DR-WCLS) estimator \cite{shi_meta-learning_2025} is well
+suited to this problem. DR-WCLS constructs a doubly robust pseudo-outcome at
+each decision point, which, because randomization probabilities are known in an
+MRT, provides an unbiased signal of the treatment effect at that decision.
+Unlike WCLS, which yields only population-averaged effects, these pseudo-outcomes
+can be aggregated within each participant to estimate individual-level effects,
+allowing us to test directly whether responsiveness varies across interns.
+Leveraging this, we (1) estimate the causal excursion effects of distinct
+therapeutic notification strategies on proximal mood, sleep, and activity;
+(2) test whether treatment responsiveness varies significantly across
+participants; and (3) identify baseline characteristics that predict positive
+versus negative responsiveness.
+
+% [hypotheses]
+We hypothesize that:
+\begin{enumerate}
+  \item[H1.] Sending a notification improves the proximal outcome in its own
+        domain (mood, sleep, or activity) relative to sending no notification
+        \cite{necamp_assessing_2020}.
+  \item[H2.] Effects on the proximal outcome differ by therapeutic strategy.
+  \item[H3.] Treatment responsiveness varies across participants beyond what
+        would be expected by chance under the randomization design.
+  \item[H4.] Baseline depressive severity, measured by the PHQ-9, moderates the
+        effect of strategy, with behavioral strategy relatively more effective
+        at higher severity and mindfulness relatively more effective at lower
+        severity \cite{dimidjian_randomized_2006, ly_behavioural_2014}.
+  \item[H5.] Mindfulness messages are more effective for interns with a history
+        of depression \cite{teasdale_prevention_2000}.
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\section{deliverable type AND DEADLINE (Optional)}
+%-----------------------------------------------------------------------
+\begin{tabular}{@{}l@{\hspace{1em}}l@{\hspace{2.5em}}l@{}}
+  \blank[1.5cm] & Abstract             & Deadline Date: \blank[4cm] \\[10pt]
+  \blank[1.5cm] & Manuscript           & Deadline Date: \blank[4cm] \\[10pt]
+  X & Internal Report      & Deadline Date: Oct 21, 2026 \\[10pt]
+  \blank[1.5cm] & Pilot data for grant & Deadline Date: \blank[4cm] \\[10pt]
+\end{tabular}
+
+\begin{tabular}{@{}l@{\hspace{1em}}l@{}}
+  \blank[1.5cm] & Other (please explain): \blank[6.5cm] \\[10pt]
+                & Deadline Date: \blank[4cm]
+\end{tabular}
+
+%-----------------------------------------------------------------------
+\section{study cohort}
+%-----------------------------------------------------------------------
+\href{https://www.dropbox.com/scl/fi/spwvotejph8oate2o8gll/PROMPT-and-COMPASS-Cohorts.pdf?rlkey=a1qa334mzxthlmv7gvrv1jiot&st=2ajkh0xm&dl=0}%
+     {\color{compassblue}PROMPT and COMPASS Cohorts Diagram}
+
+\medskip
+\begin{tabular}{@{}p{2.2in}p{2.2in}@{}}
+  \cbox RCT PROMPT & \cbox R01 PROMPT   \\[10pt]
+  \cbox COMPASS    & \cbox Full Cohort
+\end{tabular}
+
+\medskip
+\begin{tabular}{@{}p{2.2in}p{2.2in}@{}}
+  $\boxtimes$ 2025 IHS Cohort & $\boxtimes$ 2024 IHS Cohort   \\[10pt]
+\end{tabular}
+
+We will prioritize 2024 IHS cohort, possibly extending to the 2025 cohort if time permits,
+or additional sample size is needed for sufficient power.
+
+%-----------------------------------------------------------------------
+\subsection{DATA TYPES (e.g. Survey, Fitbit, Genomic, Sensorkit)}
+%-----------------------------------------------------------------------
+Survey (for BL characteristics), Fitbit \& Garmin \& HealthKit (for steps/sleep/mood outcomes as well as moderators)
+
+%-----------------------------------------------------------------------
+\subsection{Inclusions (e.g. screening cutoffs, App Assignment)}
+%-----------------------------------------------------------------------
+N/A
+
+%-----------------------------------------------------------------------
+\subsection{exclusions (if any)}
+%-----------------------------------------------------------------------
+To ensure reliable estimation of participant-level treatment effects, participants with excessive missingness with respect to proximal outcome or moderators will be excluded prior to analysis based on a predefined completion threshold.
+For retained participants, sporadic decision-point level missingness will be addressed through the observation weighting in the DR-WCLS estimation framework.
+
+%-----------------------------------------------------------------------
+\section{VARIABLES}
+%-----------------------------------------------------------------------
+
+\subsection{MAIN EXPOSURE}
+Notification (sending notification vs not sending notification),
+notification type (sleep vs mood vs activity),
+notification strategy (therapeutic strategies)
+
+\subsection{primary outcome}
+Self-reported mood, sleep duration, and step count
+
+\subsection{secondary outcome (s)}
+N/A
+
+\subsection{ADDITIONAL COVARIATES (Please Specify if these will be
+  considered as confounders, or Mediating and moderating relationships
+  will also be explored)}
+Additional covariates consist of dynamic, time-varying contextual variables measured at each decision point (e.g., previous night's sleep duration) as well as baseline characteristics.
+These variables will be evaluated as candidate moderators to assess contextual heterogeneity in treatment responsiveness and determine how real-time user state and characteristics affect the intervention effect on the proximal outcome.
+
+%-----------------------------------------------------------------------
+\section{STATISTICAL ANALYSIS}
+%-----------------------------------------------------------------------
+\textit{This can be your fully established analysis, or draft prior to
+potential consult with our analysis team.}
+
+Univariate approach:
+
+\vspace{1.5em}
+
+Multivariable approach:
+
+We evaluate overall treatment efficacy and individual response heterogeneity using a multi-stage causal inference framework.
+We begin by applying Doubly Robust Weighted and Centered Least Squares to estimate the overall marginal causal excursion effect across all participants and decision points.
+Next, using the per-decision-point doubly robust pseudo-outcomes generated by this procedure, we fit participant-specific regressions using time-varying contextual variables to estimate individual baseline treatment effects.
+To establish whether these individual treatment effects are statistically significant overall across the population, we compare observed effect magnitudes against a randomization null distribution generated by permuting treatment assignments under the design probabilities.
+We then inspect the distribution of estimated participant effects and fit Gaussian Mixture Models to evaluate response heterogeneity and identify distinct responder subgroups.
+Finally, if significant heterogeneity is confirmed, we regress participant baseline characteristics against individual treatment effects to determine which baseline profiles predict positive versus negative intervention responsiveness.
+
+All analyses will be conducted across the complete study sample as well as stratified by participant device type to evaluate potential hardware-level variability in treatment estimates.
+
+\vspace{1.5em}
+
+%-----------------------------------------------------------------------
+\section{LIMITATIONS OF THE STUDY (Optional)}
+%-----------------------------------------------------------------------
+A primary limitation of this study concerns the preprocessing and harmonization of intensive time-series data across heterogeneous commercial devices.
+Because participants were not explicitly differentiated by device model, establishing uniform measurement baselines across hardware platforms proved challenging.
+Consequently, cross-device data harmonization relied on ad-hoc alignment procedures, which may introduce calibration noise or unmeasured sensor variance.
+On the other hand, device stratification will reduce the power of the analysis.
+Furthermore, the sensitivity of causal estimates to specific time-series preprocessing choices remains a potential source of analytical variability.
+
+%-----------------------------------------------------------------------
+\section{tables/ figures}
+%-----------------------------------------------------------------------
+Title, description and shell of tables and mock figures. The following are
+examples for Table 1 and figures.
+
+\begin{enumerate}
+  \item Table 1 -- Characteristics
+  \vspace{1.5em}
+
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X
+                              |>{\centering\arraybackslash}X
+                              |>{\centering\arraybackslash}X
+                              |>{\centering\arraybackslash}X
+                              |>{\centering\arraybackslash}X|}
+  \hline
+  \centering Characteristic
+    & Overall (No. of Patients, \%)
+    & Garmin (No. Patients, \% Total)
+    & HealthKit (No. Patients, \% Total)
+    & Fitbit (No. Patients, \% Total) \\
+  \hline
+  Race            &  &  &  &  \\
+  \hline
+  \quad White     &  &  &  &  \\
+  \hline
+  \quad Black     &  &  &  &  \\
+  \hline
+  \quad Others    &  &  &  &  \\
+  \hline
+  Age             &  &  &  &  \\
+  \hline
+  \ldots          & \ldots & \ldots & \ldots & \ldots \\
+  \hline
+  \end{tabularx}
+  \renewcommand{\arraystretch}{1}
+
+%  Add further tables and mock figures below.
+
+  \item Figure 1 -- 2025 IHS Study Design
+  \includegraphics[width=\linewidth]{assets/study_design_2025.png}
+
+  \item Figure 2 -- 2024 IHS Study Design
+  \includegraphics[width=\linewidth]{assets/study_design_2024.png}
+
+  \item Table 2 -- Table of Cumulative Magnitude of Effects and P-Values
+  \vspace{1.5em}
+  
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X
+                              |>{\centering\arraybackslash}X
+                              |>{\centering\arraybackslash}X|}
+  \hline
+  \centering Intervention
+    & Cumulative Magnitude of Effect
+    & P-Value \\
+  \hline
+  Notification            &  &  \\
+  \hline
+  \quad Mindfulness       &  &  \\
+  \hline
+  \quad \ldots            & \ldots & \ldots \\
+  \hline
+  No Notification         &  &  \\
+  \hline
+  \end{tabularx}
+  \renewcommand{\arraystretch}{1}
+    
+
+  \item Figure 3 -- Distribution of Effects
+  
+  \includegraphics[width=0.4\linewidth]{assets/effect_distribution_example.png}
+
+  \item Figure 4 -- Effect vs Baseline Characteristic
+  
+  \includegraphics[width=0.4\linewidth]{assets/effect_vs_characteristic_example.png}
+\end{enumerate}
+
+
+% References
+\printbibliography
+
+
+\end{document}
