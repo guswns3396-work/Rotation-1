@@ -46,7 +46,7 @@ Output: `processed/data_final_2024.csv` in the data directory.
 
 - **Data checks and variables:** treatment labels, probability checks, and coverage and window-length thresholds (step and sleep totals set to missing below 75% coverage or outside 20–28 h windows).
 - **H1:** effect of a domain-specific message vs. no message on the outcome in its own domain (mood, log steps, sleep), plus any message vs. none. DR-WCLS pseudo-outcomes with cross-fitted random forest outcome models and known randomization probabilities; sandwich SEs clustered by participant; WCLS check; optional device-specific sensitivity analyses.
-- **H2:** effect of each strategy vs. no message within each domain, with a Wald test that strategy effects are equal and Holm-adjusted pairwise differences. Includes a check of the independence assumption between message domain and strategy (`H2_MODE = "any_domain"` if it fails).
+- **H2:** effect of each strategy vs. no message within each domain, with a Wald test that strategy effects are equal and Holm-adjusted pairwise differences. Uses joint domain-strategy probabilities `p_<domain>_<code>` for `within_domain`; `H2_MODE = "any_domain"` uses the combined strategy probabilities instead. Rerun preprocessing with the updated 48-column `2024BehaviorAgentProbabilities.csv` before running H2.
 - **Moderation of strategy effects:** one moderator at a time and all jointly per strategy; tests of whether each moderator's slope differs across strategies (H4: PHQ-9, H5: depression history); baseline × context interactions per strategy.
 
 Results are written to `results/H1`, `results/H2` and `results/moderation` inside the data directory, not the repository.
