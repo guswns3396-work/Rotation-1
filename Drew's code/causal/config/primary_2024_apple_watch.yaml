@@ -1,0 +1,10 @@
+# Primary specification, 2024 cohort, Apple watch data only.
+name: primary_2024_apple_watch
+base:
+  cohort: 2024
+  family: primary
+  device: apple
+  apple_source: watch_only
+sweep:
+  outcome: [mood, steps, sleep]
+  contrast: [any_vs_none, domain_vs_none, strategy_vs_none, type_vs_none, data_vs_nodata, data_within_strategy]

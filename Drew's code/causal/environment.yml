@@ -1,0 +1,18 @@
+# Conda environment for ihs-causal. Create with:
+#   conda env create -f environment.yml
+#   conda activate ihs-causal
+#   pip install -e .
+# Tested with Python 3.9 (numpy 2.0, pandas 2.3, pyarrow 21) and Python 3.12 (numpy 2.5, pandas 3.1, pyarrow 26).
+# Nothing else is needed: the app uses the standard library.
+name: ihs-causal
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python>=3.9
+  - numpy>=1.24
+  - pandas>=2.0
+  - pyarrow>=12
+  - pyyaml>=6
+  - pytest
+  - pip

@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IHS causal results</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10); --wash: rgba(42,120,214,0.08);
+  --s1: #2a78d6; --note: #f3f1ea; --bad: #d03b3b;
+  --pos: #2a78d6; --neg: #e34948; --mid: #f0efec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --wash: rgba(57,135,229,0.12);
+    --s1: #3987e5; --note: #222220; --bad: #e66767;
+    --pos: #3987e5; --neg: #e66767; --mid: #383835;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --wash: rgba(57,135,229,0.12);
+  --s1: #3987e5; --note: #222220; --bad: #e66767;
+  --pos: #3987e5; --neg: #e66767; --mid: #383835;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 64px; }
+header { padding: 28px 0 4px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+h1 { font-size: 20px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--ring); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; color: var(--ink-2); font: inherit; font-size: 13px; padding: 5px 11px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--wash); color: var(--ink); font-weight: 600; }
+.icon-btn, .btn { border: 1px solid var(--ring); background: var(--surface); color: var(--ink-2); border-radius: 8px; padding: 5px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+.btn.primary { background: var(--s1); border-color: var(--s1); color: #fff; font-weight: 600; padding: 7px 18px; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.datanote { background: var(--note); color: var(--ink-2); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin: 10px 0 0; }
+nav { display: flex; gap: 24px; border-bottom: 1px solid var(--grid); margin: 14px 0 24px; overflow-x: auto; }
+nav button { border: 0; background: none; font: inherit; color: var(--muted); padding: 10px 0; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+nav button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 20px 20px 12px; margin-bottom: 20px; }
+.card h2 { font-size: 16px; font-weight: 600; margin: 0 0 2px; }
+.card .note { color: var(--ink-2); font-size: 13px; margin: 0 0 12px; }
+.sub3 { font-size: 14px; font-weight: 600; margin: 18px 0 2px; }
+.empty { color: var(--muted); font-size: 14px; padding: 8px 0 12px; }
+.filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: flex-end; }
+.filters label, .field { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 3px; }
+select, input[type=text], input[type=number] { font: inherit; font-size: 13px; color: var(--ink); background: var(--surface); border: 1px solid var(--ring); border-radius: 6px; padding: 4px 6px; min-width: 110px; }
+input[type=number] { width: 90px; min-width: 0; }
+.checks { display: flex; gap: 12px; flex-wrap: wrap; color: var(--ink); font-size: 13px; }
+.checks label { flex-direction: row; align-items: center; gap: 5px; color: var(--ink); font-size: 13px; display: inline-flex; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px 18px; margin: 10px 0 6px; }
+.form-sec { font-size: 12px; font-weight: 600; color: var(--ink-2); margin: 16px 0 4px; }
+svg text { font-family: inherit; }
+.tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.rowlab { fill: var(--ink); font-size: 13px; }
+.rowsub { fill: var(--muted); font-size: 11.5px; }
+.grouplab { fill: var(--ink-2); font-size: 12px; font-weight: 600; }
+.hit { fill: transparent; }
+.hit:hover, .hit:focus { fill: var(--wash); outline: none; }
+details { margin-top: 6px; }
+summary { color: var(--muted); font-size: 12.5px; cursor: pointer; padding: 4px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin: 6px 0 8px; }
+th { text-align: left; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--grid); padding: 6px 8px 6px 0; white-space: nowrap; }
+td { border-bottom: 1px solid var(--grid); padding: 5px 8px 5px 0; font-variant-numeric: tabular-nums; }
+td.num, th.num { text-align: right; }
+.scroll { overflow-x: auto; }
+.legend { display: flex; gap: 18px; color: var(--ink-2); font-size: 12px; margin: 2px 0 6px; flex-wrap: wrap; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+#tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--ring); border-radius: 8px;
+       padding: 8px 10px; font-size: 12.5px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 340px; display: none; z-index: 10; }
+#tip .v { font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums; }
+#tip .l { color: var(--ink-2); }
+#tip .m { color: var(--muted); margin-top: 4px; }
+.prose { color: var(--ink-2); font-size: 14px; }
+.prose > p, .prose > ul, p.prose { max-width: 78ch; }
+.prose h3 { color: var(--ink); font-size: 14px; margin: 20px 0 4px; }
+.prose ul { padding-left: 20px; margin: 4px 0; }
+.prose li { margin: 3px 0; }
+.job { border-top: 1px solid var(--grid); padding: 8px 0; font-size: 13px; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; }
+.job .st { font-weight: 600; }
+.job .st.failed { color: var(--bad); }
+.job .log { grid-column: 1 / -1; color: var(--muted); font-size: 12px; white-space: pre-wrap; font-family: ui-monospace, Consolas, monospace; }
+code { font-size: 12.5px; background: var(--wash); padding: 1px 4px; border-radius: 4px; }
+.form-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: var(--wash); color: var(--ink); border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 12.5px; }
+.chip button { border: 0; background: none; color: var(--ink-2); cursor: pointer; font: inherit; padding: 0 6px; border-radius: 999px; }
+.chip button:hover { background: var(--ring); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 6px 0; }
+.runbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; font-size: 13px; color: var(--ink-2); }
+.cov { color: var(--muted); font-size: 11.5px; }
+.who-sec { border-left: 2px solid var(--grid); padding-left: 14px; margin-top: 8px; }
+.who-sec[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+/* who responds: characteristic x message grid */
+.hm { border-collapse: separate; border-spacing: 2px; width: auto; font-size: 12.5px; margin: 4px 0 8px; }
+.hm th { color: var(--ink-2); font-weight: 500; border: 0; padding: 4px 6px; text-align: center; white-space: normal; vertical-align: bottom; max-width: 96px; line-height: 1.25; }
+.hm th.rl { text-align: left; max-width: none; white-space: nowrap; font-weight: 400; color: var(--ink); cursor: pointer; }
+.hm th.rl.sel, .hm th.cl.sel { color: var(--ink); font-weight: 600; }
+.hm th.cl { cursor: pointer; }
+.hm th.grp { text-align: left; color: var(--muted); font-size: 11.5px; font-weight: 600; padding-top: 10px; }
+.hm td { border: 0; min-width: 64px; height: 30px; text-align: center; border-radius: 4px; padding: 0 6px; color: var(--ink); cursor: pointer; font-variant-numeric: tabular-nums; }
+.hm td.sig { box-shadow: inset 0 0 0 2px var(--ink); font-weight: 600; }
+.hm td.na { color: var(--muted); cursor: default; }
+.hm td.eff { background: none; color: var(--ink-2); }
+.hm td.eff.sig { color: var(--ink); }
+.hm td:focus-visible, .hm th:focus-visible { outline: 2px solid var(--s1); outline-offset: 1px; }
+.scalebar { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-size: 12px; margin: 4px 0 10px; flex-wrap: wrap; }
+.scalebar .bar { width: 160px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, color-mix(in oklab, var(--neg) 60%, var(--mid)), var(--mid), color-mix(in oklab, var(--pos) 60%, var(--mid))); }
+.sigkey { display: inline-block; width: 18px; height: 12px; border-radius: 3px; box-shadow: inset 0 0 0 2px var(--ink); vertical-align: -2px; }
+/* setup page and standard analyses */
+.bad { color: var(--bad); }
+input.path { flex: 1 1 auto; min-width: 0; width: 100%; font-size: 14px; padding: 7px 9px; }
+.setup-row { display: flex; gap: 10px; align-items: center; margin: 12px 0 6px; }
+.setup-row .btn { white-space: nowrap; flex: none; }
+.std-list { margin: 4px 0 12px; padding-left: 20px; color: var(--ink-2); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>IHS messaging study: causal effects</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <div class="controls" id="controls"></div>
+  </header>
+  <div id="datanote"></div>
+  <nav role="tablist" id="tabs"></nav>
+  <main id="main"></main>
+</div>
+<div id="tip" role="tooltip"></div>
+<script id="data" type="application/json">/*__DATA__*/null</script>
+<script>
+"use strict";
+let DATA = JSON.parse(document.getElementById("data").textContent) || {estimates: [], runs: [], diagnostics: [], notes: {}, defaults: {}, mode: "static"};
+let E = DATA.estimates;
+const SERVE = DATA.mode === "serve";
+const OUT = {mood: "Mood", steps: "Steps (log)", sleep: "Sleep (minutes)"};
+const OUT_UNITS = {mood: "mood points", steps: "log steps", sleep: "minutes"};
+const DEVICES = [["combined", "Combined"], ["apple", "Apple"], ["garmin", "Garmin"], ["fitbit", "Fitbit"]];
+const DEVNAME = Object.fromEntries(DEVICES);
+const QUESTIONS = [
+  {q: "Q1", title: "Do messages change anything?", note: "Any delivered message against no message, in the day after the decision."},
+  {q: "Q4", title: "Do messages move their own domain?", note: "Sleep messages on sleep, step messages on steps, mood messages on mood, each against no message."},
+  {q: "Q5", title: "Do messages spill over into other domains?", note: "Messages of one domain on the other two outcomes, each against no message."},
+  {q: "Q2", title: "Does the therapeutic strategy matter?", note: "Each strategy, within messages of the outcome's own domain, against no message."},
+  {q: "Q3", title: "Does showing people their own data matter?", note: "Messages that display the participant's own data against the same kind of message without it."},
+  {q: "Q6", title: "Who responds?", note: "Whether effects depend on context or baseline traits, and whether true effects differ between people."}
+];
+const MODNAME = {Mood_pre: "Mood the day before", log_steps_pre: "Steps the day before", sleep_minutes_pre: "Sleep the night before",
+  t: "Days into the study", Age: "Age", Sex: "Sex", depr0: "Depression history", PHQtot0: "PHQ-9 at baseline", GADtot0: "GAD-7 at baseline",
+  Neu0_published: "Neuroticism", SLE0: "Stressful life events", EFE0: "Early family environment"};
+const CONTEXT_MODS = new Set(["Mood_pre", "log_steps_pre", "sleep_minutes_pre", "t", "Mood_sd_pre", "Mood_n_pre", "hr_avg_pre", "RHR_pre", "observed_hours_pre", "watch_share_pre"]);
+const modName = k => MODNAME[k] || k;
+const CONTRAST_NAME = {any_vs_none: "Any message vs none", domain_vs_none: "Message domains vs none", strategy_vs_none: "Strategies vs none",
+  type_vs_none: "Message types vs none", data_vs_nodata: "Own data shown vs not", data_within_strategy: "Own data, within each strategy",
+  type_any_vs_none: "Message types, any domain", strategy_pairwise: "Strategies against CS"};
+const CONTRAST_ORDER = Object.keys(CONTRAST_NAME);
+const isWho = r => r.family === "q6" || r.family === "q6-custom";
+const state = {tab: "answers", cohort: 2025, device: "combined", apple: "watch_then_phone", scale: "std", ex: {}, rob: "", q2: "strategy", q6: "any", jobs: [], who: {}};
+if (!E.some(r => r.cohort == 2025) && E.some(r => r.cohort == 2024)) state.cohort = 2024;
+const SETUP = () => DATA.setup || {};
+if (SERVE && SETUP().needed) state.tab = "setup";       // first start on this computer: choose the data folder
+
+const BOOL_ATTRS = new Set(["checked", "disabled", "open", "selected"]);
+const el = (tag, attrs, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs || {})) { if (v == null) continue; if (BOOL_ATTRS.has(k)) { if (v) n.setAttribute(k, ""); continue; } if (k === "class") n.className = v; else n.setAttribute(k, String(v)); } kids.flat().forEach(k => { if (k != null && k !== "") n.append(k instanceof Node ? k : document.createTextNode(String(k))); }); return n; };
+const svgEl = (tag, attrs) => { const n = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, v); return n; };
+const fmt = (x, d = 2) => { if (x == null || !isFinite(x)) return "–"; const s = Number(x).toFixed(d); return +s === 0 ? Number(0).toFixed(d) : s; };
+const fmtP = p => p == null ? "–" : p < 0.001 ? "<0.001" : p.toFixed(3);
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const std = r => (r.sd_reference_outcome ? 1 / r.sd_reference_outcome : null);
+const inView = r => r.cohort == state.cohort && r.device === state.device && (state.device !== "apple" || (r.apple_source || "watch_then_phone") === state.apple);
+const order = ["mood", "steps", "sleep"];
+
+// ---------- tooltip ----------
+const tip = document.getElementById("tip");
+function showTip(ev, lines) {
+  tip.replaceChildren(...lines.map(([cls, t]) => el("div", {class: cls}, t)));
+  tip.style.display = "block";
+  tip.style.left = Math.min(ev.clientX + 14, window.innerWidth - tip.offsetWidth - 8) + "px";
+  tip.style.top = Math.min(ev.clientY + 14, window.innerHeight - tip.offsetHeight - 8) + "px";
+}
+const hideTip = () => { tip.style.display = "none"; };
+
+// ---------- forest plot ----------
+function niceStep(span) { const raw = span / 5, p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 2.5, 5, 10].map(m => m * p).find(s => s >= raw); }
+function forest(rows, opts) {
+  const box = el("div", {class: "scroll"});
+  if (!rows.length) { box.append(el("div", {class: "empty"}, opts.empty || "No estimates for this selection yet.")); return box; }
+  const W = Math.max(560, Math.min(1000, (document.querySelector(".wrap").clientWidth || 1000) - 78));
+  const left = Math.min(300, Math.round(W * 0.36)), right = 28, rowH = 30, groupH = 26, axisH = 46;
+  const groups = []; rows.forEach(r => { if (!groups.length || groups[groups.length - 1].name !== r.group) groups.push({name: r.group, rows: []}); groups[groups.length - 1].rows.push(r); });
+  const H = groups.reduce((h, g) => h + (g.name ? groupH : 0) + g.rows.length * rowH, 8) + axisH;
+  const vals = rows.flatMap(r => [r.lo, r.hi, r.slo, r.shi, r.est]).filter(v => v != null && isFinite(v));
+  let m = Math.max(...vals.map(Math.abs), 1e-9); const step = niceStep(2 * m); m = Math.ceil(m / step) * step;
+  const x = v => left + (v + m) / (2 * m) * (W - left - right);
+  const svg = svgEl("svg", {width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria || "Forest plot of estimated effects"});
+  for (let t = -m; t <= m + 1e-12; t += step) {
+    svg.append(svgEl("line", {x1: x(t), x2: x(t), y1: 4, y2: H - axisH + 4, stroke: Math.abs(t) < 1e-12 ? "var(--axis)" : "var(--grid)", "stroke-width": 1}));
+    const tx = svgEl("text", {x: x(t), y: H - axisH + 18, "text-anchor": "middle", class: "tick"}); tx.textContent = (Math.abs(t) < 1e-12 ? 0 : +t.toFixed(4)).toString(); svg.append(tx);
+  }
+  let y = 8;
+  groups.forEach(g => {
+    if (g.name) { const t = svgEl("text", {x: 0, y: y + 17, class: "grouplab"}); t.textContent = g.name; svg.append(t); y += groupH; }
+    g.rows.forEach(r => {
+      const cy = y + rowH / 2;
+      const hit = svgEl("rect", {x: 0, y: y + 1, width: W, height: rowH - 2, rx: 6, class: "hit", tabindex: 0});
+      const lab = svgEl("text", {x: 12, y: cy + (r.sub ? -1 : 4), class: "rowlab"}); lab.textContent = r.label; svg.append(hit, lab);
+      if (r.sub) { const s = svgEl("text", {x: 12, y: cy + 12, class: "rowsub"}); s.textContent = r.sub; svg.append(s); }
+      if (r.slo != null && r.shi != null) svg.append(svgEl("line", {x1: x(r.slo), x2: x(r.shi), y1: cy, y2: cy, stroke: "var(--muted)", "stroke-width": 1, "stroke-linecap": "round"}));
+      if (r.lo != null && r.hi != null) svg.append(svgEl("line", {x1: x(r.lo), x2: x(r.hi), y1: cy, y2: cy, stroke: "var(--s1)", "stroke-width": 2, "stroke-linecap": "round"}));
+      const excl = r.lo != null && (r.lo > 0 || r.hi < 0);
+      if (r.est != null) svg.append(svgEl("circle", {cx: x(r.est), cy, r: r.emph ? 6 : 4.5, fill: excl ? "var(--s1)" : "var(--surface)", stroke: excl ? "var(--surface)" : "var(--s1)", "stroke-width": 2}));
+      if (r.emph && r.est != null) svg.append(svgEl("circle", {cx: x(r.est), cy, r: 8.5, fill: "none", stroke: "var(--s1)", "stroke-width": 1}));
+      hit.addEventListener("pointermove", ev => showTip(ev, r.tipLines)); hit.addEventListener("pointerleave", hideTip);
+      hit.addEventListener("focus", () => { const b = hit.getBoundingClientRect(); showTip({clientX: b.left + left, clientY: b.bottom}, r.tipLines); }); hit.addEventListener("blur", hideTip);
+      y += rowH;
+    });
+  });
+  const unit = svgEl("text", {x: (left + W - right) / 2, y: H - 6, "text-anchor": "middle", class: "tick"}); unit.textContent = opts.unit || ""; svg.append(unit);
+  box.append(svg); return box;
+}
+function dotSvg(filled) { const s = svgEl("svg", {width: 14, height: 14}); s.append(svgEl("circle", {cx: 7, cy: 7, r: 4.5, fill: filled ? "var(--s1)" : "var(--surface)", stroke: filled ? "var(--surface)" : "var(--s1)", "stroke-width": 2})); return s; }
+function lineSvg(c, w) { const s = svgEl("svg", {width: 22, height: 10}); s.append(svgEl("line", {x1: 2, x2: 20, y1: 5, y2: 5, stroke: c, "stroke-width": w, "stroke-linecap": "round"})); return s; }
+function legend(simultaneous = true) {
+  return el("div", {class: "legend"}, el("span", {}, dotSvg(true), "interval excludes 0"), el("span", {}, dotSvg(false), "interval includes 0"),
+    el("span", {}, lineSvg("var(--s1)", 2), "95% interval"), simultaneous ? el("span", {}, lineSvg("var(--muted)", 1), "simultaneous 95% interval for the question") : null);
+}
+function toRow(r, scale, group, label, sub, emph) {
+  const k = scale === "std" ? std(r) : 1;
+  const f = v => (k != null && v != null ? v * k : null);
+  const unitTxt = scale === "std" ? "SD" : OUT_UNITS[r.outcome] || "";
+  return {group, label, sub, emph, est: f(r.estimate), lo: f(r.ci_low), hi: f(r.ci_high), slo: f(r.sim_low), shi: f(r.sim_high),
+    tipLines: [["v", `${fmt(f(r.estimate), 3)} ${unitTxt}  [${fmt(f(r.ci_low), 3)}, ${fmt(f(r.ci_high), 3)}]`],
+               ["l", `${r.contrast_label}: ${r.arm} vs ${r.reference}`], ["l", `${OUT[r.outcome] || r.outcome} · ${DEVNAME[r.device] || r.device}${r.device === "apple" && r.apple_source === "watch_only" ? " (watch only)" : ""} · ${r.cohort}`],
+               ["m", `Original units: ${fmt(r.estimate, 3)} ${OUT_UNITS[r.outcome] || ""} (se ${fmt(r.se, 3)}), p ${fmtP(r.p)}`],
+               ["m", `${(r.n_rows || 0).toLocaleString()} decisions, ${(r.n_participants || 0).toLocaleString()} participants; ${(r.n_arm || 0).toLocaleString()} received ${r.arm}`],
+               ["m", `${r.estimator}${r.learner ? " (" + r.learner + ")" : ""} · ${r.config_name}`],
+               ...(dateTxt(r) ? [["m", dateTxt(r)]] : []),
+               ...(floorTxt(r) ? [["m", floorTxt(r)]] : [])]};
+}
+function table(rows, cols, open) {
+  const t = el("table"); const hr = el("tr"); cols.forEach(c => hr.append(el("th", {class: c.num ? "num" : ""}, c.h))); t.append(el("thead", {}, hr));
+  const tb = el("tbody"); rows.forEach(r => { const tr = el("tr"); cols.forEach(c => tr.append(el("td", {class: c.num ? "num" : ""}, c.f(r)))); tb.append(tr); }); t.append(tb);
+  const d = el("details", {open: !!open}); d.append(el("summary", {}, "Table"), el("div", {class: "scroll"}, t)); return d;
+}
+const estCols = [
+  {h: "Outcome", f: r => OUT[r.outcome] || r.outcome}, {h: "Contrast", f: r => r.contrast_label}, {h: "Arm", f: r => `${r.arm} vs ${r.reference}`},
+  {h: "Term", f: r => r.term}, {h: "Estimate", num: 1, f: r => fmt(r.estimate, 3)}, {h: "SE", num: 1, f: r => fmt(r.se, 3)},
+  {h: "95% CI", num: 1, f: r => `${fmt(r.ci_low, 3)} to ${fmt(r.ci_high, 3)}`}, {h: "Std. effect", num: 1, f: r => fmt(std(r) ? r.estimate * std(r) : null, 3)},
+  {h: "p", num: 1, f: r => fmtP(r.p)}, {h: "Decisions", num: 1, f: r => (r.n_rows || 0).toLocaleString()}, {h: "People", num: 1, f: r => (r.n_participants || 0).toLocaleString()}];
+// the probability floor, mentioned only when it differs from the default
+const floorTxt = r => { const mp = r.min_prob === "" || r.min_prob == null ? 0.001 : +r.min_prob; const joint = r.positivity === "joint" && ["Q2", "Q2T"].includes(r.question);
+  return (Math.abs(mp - 0.001) > 1e-12 || joint) ? `Decisions with a probability below ${mp} dropped${joint ? ", checking every arm compared" : ""}` : ""; };
+const viewLabel = () => `${state.cohort} · ${DEVNAME[state.device]}${state.device === "apple" ? (state.apple === "watch_only" ? " (watch only)" : " (watch, else phone)") : ""}`;
+
+// ---------- Answers ----------
+function viewAnswers(main) {
+  if (SERVE && !E.some(r => r.cohort == state.cohort)) main.append(standardCard());
+  const rows = E.filter(r => inView(r) && r.family === "primary" && r.term === "effect");
+  main.append(el("p", {class: "prose"}, `Primary specification for ${viewLabel()}. Effects are in standard deviations of the outcome on no-message days, so the three outcomes share one axis; hover a row for original units and sample sizes.`), legend());
+  QUESTIONS.forEach(Q => {
+    const card = el("div", {class: "card"}, el("h2", {}, Q.title), el("p", {class: "note"}, Q.note));
+    if (Q.q === "Q6") { renderQ6(card); main.append(card); return; }
+    let sel = rows.filter(r => r.question === Q.q);
+    if (Q.q === "Q2") {
+      const types = state.q2 === "type";
+      const sg = el("div", {class: "seg", role: "group", "aria-label": "Message grouping"}, [["strategy", "By strategy"], ["type", "By strategy and own data"]].map(([k, l]) => {
+        const b = el("button", {type: "button", "aria-pressed": state.q2 === k}, l); b.onclick = () => { state.q2 = k; render(); }; return b; }));
+      card.querySelector(".note").textContent = types
+        ? "Each message type (strategy, with or without the participant's own data), within messages of the outcome's own domain, against no message."
+        : Q.note;
+      card.append(el("div", {class: "filters"}, el("label", {}, "Show", sg)));
+      sel = types ? rows.filter(r => r.question === "Q2T" && r.contrast === "type_vs_none") : sel.filter(r => r.contrast === "strategy_vs_none");
+    }
+    sel.sort((a, b) => order.indexOf(a.outcome) - order.indexOf(b.outcome) || a.contrast_label.localeCompare(b.contrast_label));
+    const fr = sel.map(r => toRow(r, "std", OUT[r.outcome], Q.q === "Q1" ? "Any message" : (Q.q === "Q4" || Q.q === "Q5") ? cap(r.scope) + " messages" : r.arm, Q.q === "Q3" ? r.contrast_label : "", false));
+    card.append(forest(fr, {unit: "effect (SD of outcome)", empty: "Not run for this cohort and device yet."}));
+    if (sel.length) card.append(table(sel, estCols));
+    main.append(card);
+  });
+}
+function renderQ6(card) {
+  const open = el("button", {class: "btn", type: "button"}, "Open the Who responds tab"); open.onclick = () => { state.tab = "who"; render(); };
+  card.append(el("div", {class: "runbar"}, "Every characteristic against every message, message type and saved run is in its own tab.", open));
+  const q6 = E.filter(r => inView(r) && r.family === "q6");
+  if (!q6.length) { card.append(el("div", {class: "empty"}, `Not run for ${viewLabel()} yet.`)); return; }
+  const mode = state.q6;
+  const sg = el("div", {class: "seg", role: "group", "aria-label": "Contrast"}, [["any", "Any message"], ["own", "Own-domain message"]].map(([k, l]) => {
+    const b = el("button", {type: "button", "aria-pressed": mode === k}, l); b.onclick = () => { state.q6 = k; render(); }; return b; }));
+  const mods = q6.filter(r => r.term.startsWith("mod:") && (mode === "any" ? r.contrast === "any_vs_none" : r.question === "Q4"));
+  const keys = Object.keys(MODNAME);
+  mods.sort((a, b) => order.indexOf(a.outcome) - order.indexOf(b.outcome) || keys.indexOf(a.term.slice(4)) - keys.indexOf(b.term.slice(4)));
+  const minQ = Math.min(...mods.map(r => r.q_bh ?? 1));
+  card.append(el("h3", {class: "sub3"}, "Do context or baseline traits change the effect?"),
+    el("p", {class: "note"}, "Change in the effect per one standard deviation of each characteristic, in standard deviations of the outcome. " +
+      (isFinite(minQ) ? (minQ < 0.1 ? "Some pass a 10% false-discovery threshold (q in the table)." : `None passes a 10% false-discovery threshold (smallest q = ${fmt(minQ, 2)}).`) : "")),
+    el("div", {class: "filters"}, el("label", {}, "Effect", sg)));
+  const fr = mods.map(r => { const k = std(r); const f = v => (k && v != null ? v * k : null); const nm = MODNAME[r.term.slice(4)] || r.term.slice(4);
+    return {group: OUT[r.outcome], label: nm, sub: "", est: f(r.estimate), lo: f(r.ci_low), hi: f(r.ci_high), slo: null, shi: null,
+      tipLines: [["v", `${fmt(f(r.estimate), 3)} SD per SD  [${fmt(f(r.ci_low), 3)}, ${fmt(f(r.ci_high), 3)}]`], ["l", `${nm} · ${r.contrast_label}`],
+        ["m", `Original units: ${fmt(r.estimate, 3)} ${OUT_UNITS[r.outcome] || ""} per SD (${fmt(r.moderator_sd, 2)}); p ${fmtP(r.p)}, q ${fmt(r.q_bh, 2)}`],
+        ["m", `${(r.n_rows_moderator || 0).toLocaleString()} decisions with this characteristic recorded`]]}; });
+  card.append(forest(fr, {unit: "change in effect (SD of outcome) per SD of the characteristic"}));
+  card.append(table(mods, [{h: "Outcome", f: r => OUT[r.outcome]}, {h: "Contrast", f: r => r.contrast_label}, {h: "Characteristic", f: r => MODNAME[r.term.slice(4)] || r.term},
+    {h: "Slope (orig. units per SD)", num: 1, f: r => fmt(r.estimate, 3)}, {h: "SE", num: 1, f: r => fmt(r.se, 3)}, {h: "p", num: 1, f: r => fmtP(r.p)}, {h: "q (BH)", num: 1, f: r => fmt(r.q_bh, 2)},
+    {h: "Decisions", num: 1, f: r => (r.n_rows_moderator || 0).toLocaleString()}]));
+  const sdOf = {}; q6.filter(r => r.term === "effect").forEach(r => { sdOf[r.run_id + "|" + r.contrast_label] = r.sd_reference_outcome; });
+  const runIds = new Set(q6.map(r => r.run_id)), het = [];
+  DATA.diagnostics.filter(d => runIds.has(d.run_id) && d.heterogeneity).forEach(d =>
+    Object.entries(d.heterogeneity).forEach(([, h]) => het.push({outcome: d.outcome, contrast: d.contrast_label, sd: sdOf[d.run_id + "|" + d.contrast_label], ...h})));
+  het.sort((a, b) => order.indexOf(a.outcome) - order.indexOf(b.outcome) || a.contrast.localeCompare(b.contrast));
+  const sdU = (v, r) => (r.sd ? `${fmt(v, 2)} (${fmt(v / r.sd, 2)} SD)` : fmt(v, 2));
+  const anyDetected = het.some(h => h.p_hetero < 0.05);
+  card.append(el("h3", {class: "sub3"}, "How much do true effects vary between people?"),
+    el("p", {class: "note"}, "Each person's effect is estimated separately in alternating study weeks; agreement between the two halves across people measures how much true effects differ from person to person. " +
+      (anyDetected ? "Where variation is detected, the share explained by baseline traits is shown." : "No contrast shows detectable variation, so the share explained by baseline traits is not shown.")));
+  card.append(table(het, [{h: "Outcome", f: r => OUT[r.outcome]}, {h: "Contrast", f: r => r.contrast}, {h: "People", num: 1, f: r => (r.split_half_people || r.people || 0).toLocaleString()},
+    {h: "Mean effect", num: 1, f: r => sdU(r.mean_effect, r)}, {h: "SD of person effects", num: 1, f: r => sdU(r.tau, r)},
+    {h: "95% CI", num: 1, f: r => r.tau_ci ? `${fmt(r.tau_ci[0], 2)} to ${fmt(r.tau_ci[1], 2)}` : "–"}, {h: "p (variation)", num: 1, f: r => fmtP(r.p_hetero)},
+    {h: "Half-to-half r", num: 1, f: r => fmt(r.split_half_r, 2)}, {h: "Explained by baseline", num: 1, f: r => (r.p_hetero < 0.05 && r.explained_by_baseline != null ? Math.round(100 * r.explained_by_baseline) + "%" : "–")}], true));
+}
+
+// ---------- Explorer ----------
+function options(rows, key) { return [...new Set(rows.map(r => r[key]).filter(v => v != null && v !== ""))].sort(); }
+function selectBox(label, key, values, all, target, names) {
+  const s = el("select", {"aria-label": label}); if (all) s.append(el("option", {value: ""}, "All"));
+  const cur = String(target[key] ?? "");
+  // a filter value missing from this view stays visible, so the page never filters by something it does not show
+  if (cur && !values.map(String).includes(cur)) values = [cur, ...values];
+  values.forEach(v => { const o = el("option", {value: v}, names ? names(v) : String(v)); if (cur === String(v)) o.selected = true; s.append(o); });
+  s.addEventListener("change", () => { target[key] = s.value; render(); }); return el("label", {}, label, s);
+}
+function runFilterBar(f, n) {
+  if (!f.runs) return null;
+  const clear = el("button", {class: "btn", type: "button"}, "Show every analysis"); clear.onclick = () => { delete f.runs; delete f.runsLabel; render(); };
+  return el("div", {class: "runbar"}, el("span", {class: "chip"}, `Run: ${f.runsLabel || "selected run"}`), `${n.toLocaleString()} estimate${n === 1 ? "" : "s"} from this run in ${viewLabel()}`, clear);
+}
+function viewExplorer(main) {
+  const f = state.ex; if (f.term == null) f.term = "effect";
+  const runSet = f.runs ? new Set(f.runs) : null;
+  const base = E.filter(r => inView(r) && (!runSet || runSet.has(r.run_id)));
+  const keys = [["Analysis", "config_name"], ["Question", "question"], ["Outcome", "outcome"], ["Contrast", "contrast"], ["Estimator", "estimator"], ["Term", "term"]];
+  const rb = runFilterBar(f, base.filter(r => r.term === f.term || !f.term).length); if (rb) main.append(rb);
+  const bar = el("div", {class: "filters"}, keys.map(([l, k]) => selectBox(l, k, options(base, k), k !== "term", f)));
+  const sc = el("div", {class: "seg", role: "group", "aria-label": "Scale"}, ["std", "raw"].map(v => { const b = el("button", {type: "button", "aria-pressed": state.scale === v}, v === "std" ? "Standardized" : "Original units"); b.onclick = () => { state.scale = v; render(); }; return b; }));
+  bar.append(el("label", {}, "Scale", sc));
+  const sel = base.filter(r => keys.every(([, k]) => !f[k] || String(r[k]) === String(f[k])));
+  sel.sort((a, b) => order.indexOf(a.outcome) - order.indexOf(b.outcome) || a.contrast_label.localeCompare(b.contrast_label) || a.arm.localeCompare(b.arm));
+  const scale = state.scale === "std" && f.term === "effect" ? "std" : "raw";
+  const card = el("div", {class: "card"}, el("h2", {}, `${sel.length} estimate${sel.length === 1 ? "" : "s"} · ${viewLabel()}`), el("p", {class: "note"}, scale === "std" ? "Standardized effects." : "Original units; outcomes differ in units, so compare within an outcome."));
+  card.append(legend(), forest(sel.slice(0, 120).map(r => toRow(r, scale, `${OUT[r.outcome] || r.outcome} · ${r.contrast_label}`, `${r.arm} vs ${r.reference}`, r.term !== "effect" ? r.term : r.config_name, false)), {unit: scale === "std" ? "effect (SD)" : "effect (original units)"}));
+  if (sel.length > 120) card.append(el("div", {class: "empty"}, `Showing the first 120 of ${sel.length}; narrow the filters to see the rest. The table lists all.`));
+  card.append(table(sel, estCols.concat([{h: "Analysis", f: r => r.config_name}, {h: "Estimator", f: r => r.estimator}])));
+  main.append(bar, card);
+}
+
+// ---------- Who responds ----------
+const fmtS = (v, d = 2) => { if (v == null || !isFinite(v)) return "–"; const s = Number(v).toFixed(d); return +s === 0 ? Number(0).toFixed(d) : (v > 0 ? "+" : "") + s; };
+const sdv = r => { const k = std(r); return k && r.estimate != null ? r.estimate * k : null; };
+const excl = r => r.ci_low != null && (r.ci_low > 0 || r.ci_high < 0);
+function divergingBg(v, max) {
+  if (v == null || !isFinite(v) || !max) return "";
+  return `color-mix(in oklab, var(${v >= 0 ? "--pos" : "--neg"}) ${Math.round(60 * Math.min(1, Math.abs(v) / max))}%, var(--mid))`;
+}
+function tipOn(node, lines) {
+  node.addEventListener("pointermove", ev => showTip(ev, lines)); node.addEventListener("pointerleave", hideTip);
+  node.addEventListener("focus", () => { const b = node.getBoundingClientRect(); showTip({clientX: b.left, clientY: b.bottom}, lines); }); node.addEventListener("blur", hideTip);
+}
+function colLabel(r) {
+  if (r.contrast === "any_vs_none") return "Any message";
+  if (r.contrast === "data_vs_nodata") return "Own data shown";
+  if (r.contrast === "data_within_strategy") return r.contrast_label.split(":")[0] + ", own data shown";
+  if (r.contrast === "domain_vs_none") return cap(r.arm) + (r.question === "Q4" ? " (own domain)" : "");
+  return r.arm;
+}
+function whoAnalyses(rows) {
+  const names = [...new Set(rows.map(r => r.config_name))];
+  const standing = names.filter(n => rows.some(r => r.config_name === n && r.family === "q6")).sort();
+  return [...standing, ...names.filter(n => !standing.includes(n)).sort().reverse()];
+}
+function viewWho(main) {
+  const all = E.filter(r => inView(r) && isWho(r));
+  if (!all.length) {
+    main.append(el("div", {class: "card"}, el("h2", {}, "Who responds"), el("div", {class: "empty"}, `No who-responds analyses for ${viewLabel()} yet. ` +
+      (SERVE ? "In the Run tab, tick Who responds under the questions, choose the characteristics and run." : "Start the app (ihs-causal serve) to run one."))));
+    return;
+  }
+  const W = state.who;
+  const analyses = whoAnalyses(all);
+  if (!analyses.includes(W.analysis)) W.analysis = analyses[0];
+  const rowsA = all.filter(r => r.config_name === W.analysis);
+  const outcomes = order.filter(o => rowsA.some(r => r.outcome === o));
+  if (!outcomes.includes(W.outcome)) W.outcome = outcomes[0];
+  const rowsO = rowsA.filter(r => r.outcome === W.outcome);
+  const contrasts = CONTRAST_ORDER.filter(c => rowsO.some(r => r.contrast === c));
+  if (!contrasts.includes(W.contrast)) W.contrast = contrasts[0];
+  const sel = rowsO.filter(r => r.contrast === W.contrast);
+  const r0 = sel[0];
+
+  // filters
+  const aSel = el("select", {"aria-label": "Analysis"}); analyses.forEach(n => { const o = el("option", {value: n}, n + (all.some(r => r.config_name === n && r.family === "q6") ? " (standing)" : "")); if (n === W.analysis) o.selected = true; aSel.append(o); });
+  aSel.onchange = () => { W.analysis = aSel.value; W.focus = null; render(); };
+  const oSeg = seg("Outcome", outcomes.map(o => [o, OUT[o]]), W.outcome, v => { W.outcome = v; W.focus = null; render(); });
+  const cSel = el("select", {"aria-label": "Messages compared"}); contrasts.forEach(c => { const o = el("option", {value: c}, CONTRAST_NAME[c] || c); if (c === W.contrast) o.selected = true; cSel.append(o); });
+  cSel.onchange = () => { W.contrast = cSel.value; W.focus = null; render(); };
+  main.append(el("div", {class: "filters"}, el("label", {}, "Analysis", aSel), el("label", {}, "Outcome", oSeg), el("label", {}, "Messages compared", cSel)));
+
+  // grid: one column per message (contrast item and arm), one row per characteristic
+  const colKey = r => r.contrast_label + "|" + r.arm;
+  const cols = []; sel.filter(r => r.term === "effect").forEach(r => { if (!cols.some(c => c.key === colKey(r))) cols.push({key: colKey(r), label: colLabel(r), eff: r}); });
+  const named = Object.keys(MODNAME);
+  const rank = k => named.includes(k) ? named.indexOf(k) : 999;
+  const modKeys = [...new Set(sel.filter(r => r.term.startsWith("mod:")).map(r => r.term.slice(4)))].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  const cell = {}; sel.forEach(r => { if (r.term.startsWith("mod:")) cell[r.term.slice(4) + "||" + colKey(r)] = r; });
+  const vals = Object.values(cell).map(sdv).filter(v => v != null);
+  const max = vals.length ? niceStep(Math.max(...vals.map(Math.abs)) * 5) : 1;
+  if (!W.focus || (W.focus.kind === "col" ? !cols.some(c => c.key === W.focus.key) : !modKeys.includes(W.focus.key))) W.focus = {kind: "col", key: cols.length ? cols[0].key : ""};
+  const pick = f => () => { W.focus = f; render(); };
+  const keyAct = (node, f) => { node.addEventListener("click", f); node.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); f(); } }); };
+
+  const card = el("div", {class: "card"}, el("h2", {}, `Who responds · ${OUT[W.outcome]} · ${CONTRAST_NAME[W.contrast] || W.contrast}`),
+    el("p", {class: "note"}, `How the effect of each message changes per one standard deviation of each characteristic, in standard deviations of ${OUT[W.outcome].toLowerCase()} on no-message days. ` +
+      `Blue: the message helps more as the characteristic rises; red: less. The first row is the message's average effect. Hover a cell for original units and sample sizes; click a column or row to plot it below.`));
+  const t = el("table", {class: "hm"});
+  const hr = el("tr", {}, el("th", {}, ""), cols.map(c => { const th = el("th", {class: "cl" + (W.focus.kind === "col" && W.focus.key === c.key ? " sel" : ""), scope: "col", tabindex: 0}, c.label); keyAct(th, pick({kind: "col", key: c.key})); return th; }));
+  t.append(el("thead", {}, hr));
+  const tb = el("tbody");
+  tb.append(el("tr", {}, el("th", {class: "rl", scope: "row"}, "Average effect"), cols.map(c => {
+    const r = c.eff, td = el("td", {class: "eff" + (excl(r) ? " sig" : ""), tabindex: 0}, fmtS(sdv(r)));
+    tipOn(td, [["v", `${fmtS(sdv(r), 3)} SD  [${fmtS(r.ci_low * std(r), 3)}, ${fmtS(r.ci_high * std(r), 3)}]`], ["l", `${c.label}: average effect vs ${r.reference}`],
+      ["m", `Original units: ${fmtS(r.estimate, 3)} ${OUT_UNITS[r.outcome] || ""}, p ${fmtP(r.p)}`], ["m", `${(r.n_rows || 0).toLocaleString()} decisions, ${(r.n_participants || 0).toLocaleString()} people; ${(r.n_arm || 0).toLocaleString()} received it`]]);
+    return td; })));
+  const group = (title, keys) => {
+    if (!keys.length) return;
+    tb.append(el("tr", {}, el("th", {class: "grp", colspan: cols.length + 1}, title)));
+    keys.forEach(k => {
+      const th = el("th", {class: "rl" + (W.focus.kind === "row" && W.focus.key === k ? " sel" : ""), scope: "row", tabindex: 0}, modName(k)); keyAct(th, pick({kind: "row", key: k}));
+      tb.append(el("tr", {}, th, cols.map(c => {
+        const r = cell[k + "||" + c.key];
+        if (!r) return el("td", {class: "na"}, "–");
+        const v = sdv(r), q = r.q_bh != null && r.q_bh < 0.1;
+        const td = el("td", {class: excl(r) ? "sig" : "", tabindex: 0, style: `background:${divergingBg(v, max)}`}, fmtS(v) + (q ? "*" : ""));
+        keyAct(td, pick({kind: "col", key: c.key}));
+        tipOn(td, [["v", `${fmtS(v, 3)} SD per SD  [${fmtS(r.ci_low * std(r), 3)}, ${fmtS(r.ci_high * std(r), 3)}]`], ["l", `${modName(k)} · ${c.label}`],
+          ["m", `Original units: ${fmtS(r.estimate, 3)} ${OUT_UNITS[r.outcome] || ""} per SD of the characteristic (SD ${fmt(r.moderator_sd, 2)})`],
+          ["m", `p ${fmtP(r.p)}, q ${fmt(r.q_bh, 2)} across the characteristics for this message`], ["m", `${(r.n_rows_moderator || 0).toLocaleString()} decisions with it recorded`]]);
+        return td; })));
+    });
+  };
+  group("Context the day before", modKeys.filter(k => CONTEXT_MODS.has(k)));
+  group("Baseline survey", modKeys.filter(k => !CONTEXT_MODS.has(k)));
+  t.append(tb);
+  card.append(el("div", {class: "scalebar"}, el("span", {}, fmtS(-max)), el("span", {class: "bar", "aria-hidden": "true"}), el("span", {}, fmtS(max) + " SD per SD"),
+    el("span", {style: "margin-left:14px"}, el("span", {class: "sigkey"}), " 95% interval excludes 0"), el("span", {style: "margin-left:14px"}, "* passes a 10% false-discovery threshold across the characteristics for that message")));
+  card.append(el("div", {class: "scroll"}, t));
+
+  // skipped characteristics and the settings of this analysis
+  const ids = new Set(sel.map(r => r.run_id));
+  const diags = DATA.diagnostics.filter(d => ids.has(d.run_id));
+  const skipped = {}; diags.forEach(d => Object.entries(d.moderators_skipped || {}).forEach(([k, why]) => { skipped[k] = why; }));
+  if (Object.keys(skipped).length) card.append(el("p", {class: "note"}, "Not estimated: " + Object.entries(skipped).map(([k, why]) => `${modName(k)} (${why})`).join("; ") + "."));
+  if (r0) card.append(el("p", {class: "note"}, `${r0.cohort} · ${DEVNAME[r0.device] || r0.device}${r0.device === "apple" && r0.apple_source === "watch_only" ? " (watch only)" : ""} · ${dateTxt(r0) || "whole study year"} · ` +
+    `${r0.estimator} (${r0.learner}) · keep rules ${shortJSON(r0.keep)} · probability floor ${r0.min_prob}${r0.positivity === "joint" ? ", every arm checked" : ""}`));
+  main.append(card);
+
+  // the focused column or row as a forest plot
+  const fc = el("div", {class: "card"});
+  let fr = [];
+  if (W.focus.kind === "col") {
+    const c = cols.find(x => x.key === W.focus.key);
+    fc.append(el("h2", {}, `${c ? c.label : ""}: how its effect changes with each characteristic`));
+    fr = modKeys.map(k => cell[k + "||" + W.focus.key]).filter(Boolean).map(r => ({r, group: CONTEXT_MODS.has(r.term.slice(4)) ? "Context the day before" : "Baseline survey", label: modName(r.term.slice(4))}));
+  } else {
+    fc.append(el("h2", {}, `${modName(W.focus.key)}: across the messages compared`));
+    fr = cols.map(c => cell[W.focus.key + "||" + c.key]).filter(Boolean).map(r => ({r, group: "", label: colLabel(r)}));
+  }
+  fr.sort((a, b) => (a.group === b.group ? 0 : a.group === "Context the day before" ? -1 : 1));
+  fc.append(el("p", {class: "note"}, "Change in the effect (SD of the outcome) per SD of the characteristic, with 95% intervals."), legend(false));
+  fc.append(forest(fr.map(({r, group, label}) => { const k = std(r); const f = v => (k && v != null ? v * k : null);
+    return {group, label, sub: "", est: f(r.estimate), lo: f(r.ci_low), hi: f(r.ci_high), slo: null, shi: null,
+      tipLines: [["v", `${fmtS(f(r.estimate), 3)} SD per SD  [${fmtS(f(r.ci_low), 3)}, ${fmtS(f(r.ci_high), 3)}]`], ["l", `${modName(r.term.slice(4))} · ${colLabel(r)}`],
+        ["m", `Original units: ${fmtS(r.estimate, 3)} ${OUT_UNITS[r.outcome] || ""} per SD; p ${fmtP(r.p)}, q ${fmt(r.q_bh, 2)}`], ["m", `${(r.n_rows_moderator || 0).toLocaleString()} decisions with it recorded`]]}; }),
+    {unit: "change in effect (SD of outcome) per SD of the characteristic", empty: "Nothing to plot for this selection."}));
+  const modRows = sel.filter(r => r.term.startsWith("mod:"));
+  fc.append(table(modRows, [{h: "Message", f: r => colLabel(r)}, {h: "Characteristic", f: r => modName(r.term.slice(4))},
+    {h: "Change (SD per SD)", num: 1, f: r => fmtS(sdv(r), 3)}, {h: "Original units per SD", num: 1, f: r => fmtS(r.estimate, 3)}, {h: "SE", num: 1, f: r => fmt(r.se, 3)},
+    {h: "95% CI (orig.)", num: 1, f: r => `${fmt(r.ci_low, 3)} to ${fmt(r.ci_high, 3)}`}, {h: "p", num: 1, f: r => fmtP(r.p)}, {h: "q (BH)", num: 1, f: r => fmt(r.q_bh, 2)},
+    {h: "Decisions", num: 1, f: r => (r.n_rows_moderator || 0).toLocaleString()}]));
+  main.append(fc);
+
+  // how much true effects vary between people, per message
+  const sdOf = {}; sel.filter(r => r.term === "effect").forEach(r => { sdOf[r.run_id + "|" + r.contrast_label] = r.sd_reference_outcome; });
+  const het = [];
+  diags.filter(d => d.heterogeneity).forEach(d => Object.entries(d.heterogeneity).forEach(([arm, h]) => het.push({arm, label: d.contrast_label, sd: sdOf[d.run_id + "|" + d.contrast_label], ...h})));
+  const sdU = (v, r) => (r.sd ? `${fmt(v, 2)} (${fmt(v / r.sd, 2)} SD)` : fmt(v, 2));
+  const hc = el("div", {class: "card"}, el("h2", {}, "How much do true effects vary between people?"),
+    el("p", {class: "note"}, "Each person's effect is estimated separately in alternating study weeks; agreement between the two halves across people measures how much true effects differ from person to person. The share explained is by the baseline characteristics ticked for this analysis, shown where variation is detected."));
+  if (!het.length) hc.append(el("div", {class: "empty"}, "Too few people with enough decisions in both halves for this selection."));
+  else hc.append(table(het, [{h: "Message", f: r => r.arm === "message" ? "Any message" : r.arm}, {h: "People", num: 1, f: r => (r.split_half_people || r.people || 0).toLocaleString()},
+    {h: "Mean effect", num: 1, f: r => sdU(r.mean_effect, r)}, {h: "SD of person effects", num: 1, f: r => sdU(r.tau, r)},
+    {h: "95% CI", num: 1, f: r => r.tau_ci ? `${fmt(r.tau_ci[0], 2)} to ${fmt(r.tau_ci[1], 2)}` : "–"}, {h: "p (variation)", num: 1, f: r => fmtP(r.p_hetero)},
+    {h: "Half-to-half r", num: 1, f: r => fmt(r.split_half_r, 2)}, {h: "Explained by baseline", num: 1, f: r => (r.p_hetero < 0.05 && r.explained_by_baseline != null ? Math.round(100 * r.explained_by_baseline) + "%" : "–")}], true));
+  main.append(hc);
+}
+
+// ---------- Robustness ----------
+const shortJSON = s => { try { const o = typeof s === "string" ? JSON.parse(s) : s; return Object.entries(o).map(([k, v]) => `${k}=${v}`).join(", "); } catch (e) { return String(s || ""); } };
+function viewRobustness(main) {
+  const base = E.filter(r => r.cohort == state.cohort && r.term === "effect");
+  if (!base.length) { main.append(el("div", {class: "empty"}, "No estimates yet for this cohort.")); return; }
+  const keyOf = r => `${r.outcome}|${r.contrast_label}|${r.arm}`;
+  const keys = [...new Set(base.map(keyOf))].sort((a, b) => order.indexOf(a.split("|")[0]) - order.indexOf(b.split("|")[0]) || a.localeCompare(b));
+  if (!state.rob || !keys.includes(state.rob)) state.rob = keys[0];
+  const s = el("select", {"aria-label": "Effect"}); keys.forEach(k => { const [o, c, a] = k.split("|"); const opt = el("option", {value: k}, `${OUT[o] || o} · ${c} · ${a}`); if (k === state.rob) opt.selected = true; s.append(opt); });
+  s.onchange = () => { state.rob = s.value; render(); };
+  const sel = base.filter(r => keyOf(r) === state.rob).sort((a, b) => a.estimate - b.estimate);
+  const card = el("div", {class: "card"}, el("h2", {}, "One effect across every analysis run"), el("p", {class: "note"}, `All devices and settings run for the ${state.cohort} cohort, sorted by estimate. Ringed rows are the primary specification. A finding is robust when its sign and rough size hold across reasonable choices.`));
+  card.append(forest(sel.map(r => toRow(r, "std", "", `${DEVNAME[r.device] || r.device}${r.apple_source === "watch_only" ? " (watch only)" : ""} · ${r.config_name}`, `${r.estimator}${r.learner ? " " + r.learner : ""} · ${shortJSON(r.keep)}`, r.family === "primary")), {unit: "effect (SD)"}));
+  card.append(table(sel, [{h: "Device", f: r => (DEVNAME[r.device] || r.device) + (r.apple_source === "watch_only" ? " (watch only)" : "")}, {h: "Analysis", f: r => r.config_name}, {h: "Estimator", f: r => r.estimator},
+    {h: "Dates", f: r => dateTxt(r).replace("Decisions ", "") || "whole year"}, {h: "Window", f: r => shortJSON(r.window)}, {h: "Keep rules", f: r => shortJSON(r.keep)}, {h: "Estimate", num: 1, f: r => fmt(r.estimate, 3)},
+    {h: "95% CI", num: 1, f: r => `${fmt(r.ci_low, 3)} to ${fmt(r.ci_high, 3)}`}, {h: "Decisions", num: 1, f: r => (r.n_rows || 0).toLocaleString()}]));
+  main.append(el("div", {class: "filters"}, el("label", {}, "Effect", s)), card);
+}
+
+// ---------- Run ----------
+const runForm = {};
+function field(label, input) { return el("label", {class: "field"}, label, input); }
+function numInput(key, value, step) { const i = el("input", {type: "number", value: runForm[key] ?? value, step: step || "1"}); i.oninput = () => { runForm[key] = i.value; }; return i; }
+function selInput(key, choices, value) { const s = el("select", {}); choices.forEach(([v, l]) => { const o = el("option", {value: v}, l); if (String(runForm[key] ?? value) === String(v)) o.selected = true; s.append(o); }); s.onchange = () => { runForm[key] = s.value; if (key === "cohort") { delete runForm.date_from; delete runForm.date_to; } render(); }; return s; }
+function dateInput(key, range) { const i = el("input", {type: "date", value: runForm[key] || (range ? range[key === "date_from" ? 0 : 1] : ""), min: range ? range[0] : null, max: range ? range[1] : null, "aria-label": key === "date_from" ? "First decision date" : "Last decision date"}); i.onchange = i.oninput = () => { runForm[key] = i.value; }; return i; }
+const dateTxt = r => (r.date_from || r.date_to) ? `Decisions ${r.date_from ? "from " + r.date_from : ""}${r.date_from && r.date_to ? " " : ""}${r.date_to ? "to " + r.date_to : ""}` : "";
+function checkGroup(key, choices, defaults) {
+  if (!runForm[key]) runForm[key] = defaults.slice();
+  return el("div", {class: "checks"}, choices.map(([v, l]) => { const c = el("input", {type: "checkbox", checked: runForm[key].includes(v), "aria-label": l}); c.onchange = () => { runForm[key] = c.checked ? [...runForm[key], v] : runForm[key].filter(x => x !== v); }; return el("label", {}, c, l); }));
+}
+function viewRun(main) {
+  if (!SERVE) {
+    main.append(el("div", {class: "card prose"}, el("h2", {}, "Running analyses"),
+      el("p", {}, "This page is a static snapshot. To choose settings and run analyses from here, start the app on your own computer: double-click Start (Windows).bat or Start (Mac).command in the package folder, or run"),
+      el("p", {}, el("code", {}, "ihs-causal serve")),
+      el("p", {}, "It opens this page in your browser with a Run panel. Results from every run are stored and appear in the other tabs.")));
+    return;
+  }
+  const d = DATA.defaults || {}; const keep = d.keep || {}; const win = d.window || {};
+  const card = el("div", {class: "card"}, el("h2", {}, "Run an analysis"), el("p", {class: "note"}, "Pick settings and run. Runs take seconds once a window type has been built; results appear in the other tabs and stay stored."));
+  card.append(el("div", {class: "form-grid"},
+    field("Label", (() => { const i = el("input", {type: "text", value: runForm.label || "", placeholder: "e.g. steps with 8 observed hours"}); i.oninput = () => { runForm.label = i.value; }; return i; })()),
+    field("Cohort", selInput("cohort", [["2025", "2025"], ["2024", "2024"]], state.cohort)),
+    field("Device", selInput("device", DEVICES, state.device)),
+    field("Apple data", selInput("apple_source", [["watch_then_phone", "Watch, else phone"], ["watch_only", "Watch only"]], state.apple)),
+    field("Probabilities (2025)", selInput("prob_scope", [["marginal", "Over agent choice"], ["selected", "Selected agent"]], d.prob_scope || "marginal"))));
+  card.append(el("div", {class: "form-sec"}, "Outcomes"), checkGroup("outcomes", [["mood", "Mood"], ["steps", "Steps"], ["sleep", "Sleep"]], ["mood", "steps", "sleep"]));
+  card.append(el("div", {class: "form-sec"}, "Questions"), checkGroup("questions", [["Q1", "Any message"], ["Q45", "Message domains"], ["Q2", "Strategies"], ["QT", "Message types"], ["Q3", "Showing own data"]], ["Q1", "Q45"]));
+  card.append(whoSection());
+  const isFixed = (runForm.window || "next_decision") === "fixed";
+  card.append(el("div", {class: "form-sec"}, "Window"), el("div", {class: "form-grid"},
+    field("Window", selInput("window", [["next_decision", "To the next day's decision"], ["fixed", "Fixed length"]], "next_decision")),
+    isFixed ? field("Hours after the decision", numInput("fixed_hours", 24)) : field("Shortest day (hours)", numInput("span_min", win.span_min ?? 20)),
+    isFixed ? null : field("Longest day (hours)", numInput("span_max", win.span_max ?? 28))));
+  card.append(el("div", {class: "form-sec"}, "Keep rules"), el("div", {class: "form-grid"},
+    field("Steps: observed hours at least", numInput("steps_min_observed_hours", keep.steps_min_observed_hours ?? 10)),
+    field("Sleep: short night under (minutes)", numInput("sleep_short_night_minutes", keep.sleep_short_night_minutes ?? 180, "10")),
+    field("Short night kept if worn overnight at least", numInput("sleep_night_wear_min", keep.sleep_night_wear_min ?? 0.67, "0.01")),
+    field("Night from (hour)", numInput("night_start_hour", keep.night_start_hour ?? 22)), field("Night until (hour)", numInput("night_end_hour", keep.night_end_hour ?? 7))));
+  const rng = (DATA.date_ranges || {})[String(runForm.cohort || state.cohort)];
+  card.append(el("div", {class: "form-sec"}, "Dates"), el("div", {class: "form-grid"},
+    field("First decision date", dateInput("date_from", rng)), field("Last decision date", dateInput("date_to", rng))),
+    el("div", {class: "form-row"}, el("p", {class: "note"}, `Inclusive. Starts as the whole study year${rng ? ` (${rng[0]} to ${rng[1]})` : ""}; adjust either end.`),
+      (() => { const b = el("button", {class: "btn", type: "button", disabled: !runForm.date_from && !runForm.date_to}, "Whole year");
+               b.onclick = () => { delete runForm.date_from; delete runForm.date_to; render(); }; return b; })()));
+  card.append(el("div", {class: "form-sec"}, "Low probabilities"), el("div", {class: "form-grid"},
+    field("Drop decisions where a probability is below", numInput("min_prob", d.min_prob ?? 0.001, "0.001")),
+    field("Probabilities checked", selInput("positivity", [["pairwise", "Only the two arms compared"], ["joint", "Every arm compared"]], d.positivity || "pairwise")),
+    field("Leave out arms with fewer decisions than", numInput("min_arm_rows", d.min_arm_rows ?? 200, "10"))));
+  card.append(el("div", {class: "form-sec"}, "Estimator"), el("div", {class: "form-grid"},
+    field("Estimator", selInput("estimator", [["drwcls", "DR-WCLS"], ["wcls", "WCLS"]], "drwcls")),
+    field("Outcome model", selInput("learner", [["ridge", "Ridge"], ["mean", "Arm means only"]], "ridge")),
+    field("Cross-fitting folds", numInput("folds", 5))));
+  const btn = el("button", {class: "btn primary", type: "button", id: "run-btn"}, "Run"); btn.onclick = () => submitRun(btn);
+  card.append(el("div", {class: "form-row", style: "margin-top: 16px; justify-content: flex-start"}, btn, el("span", {class: "note", id: "run-msg", style: "margin:0"}, state.runMsg || "")));
+  if (standardMissing()) main.append(standardCard(), card, jobsCard(), savedCard());
+  else main.append(card, jobsCard(), savedCard(), standardCard());
+}
+// ---------- the standing analyses (config/pipeline.yaml) ----------
+const standardMissing = () => Object.values(DATA.standard || {}).some(s => s && s.ready && s.stored < s.total);
+function standardCard() {
+  const st = DATA.standard || {};
+  const card = el("div", {class: "card", id: "standard-card"}, el("h2", {}, "Standard analyses"));
+  if (st.error) { card.append(el("p", {class: "note bad"}, `config/pipeline.yaml could not be read: ${st.error}`)); return card; }
+  const cohorts = Object.keys(st).sort().reverse();
+  const stored = cohorts.reduce((n, c) => n + st[c].stored, 0);
+  const missing = cohorts.reduce((n, c) => n + (st[c].ready ? st[c].total - st[c].stored : 0), 0);
+  card.append(el("p", {class: "note"}, stored === 0
+    ? "No results yet. The standard analyses answer questions 1 to 6 for every device and outcome. The first time takes roughly 15 minutes for both cohorts; results appear as each analysis is stored, and the app can be used meanwhile."
+    : "Questions 1 to 6 for every device and outcome, as listed in config/pipeline.yaml."));
+  card.append(el("ul", {class: "std-list"}, cohorts.map(c => el("li", {}, `${c}: ${st[c].ready ? `${st[c].stored} of ${st[c].total} stored` : st[c].status}`))));
+  const running = state.jobs.some(j => j.kind === "standard" && (j.status === "queued" || j.status === "running"));
+  const b = el("button", {class: missing && !running ? "btn primary" : "btn", type: "button", disabled: !missing || running},
+    running ? "Running…" : !missing ? "All stored" : stored ? `Run the ${missing} missing` : "Run the standard analyses");
+  b.onclick = async () => {
+    b.disabled = true;
+    try {
+      const j = await (await fetch("/api/standard", {method: "POST", headers: {"Content-Type": "application/json"}, body: "{}"})).json();
+      if (j.error) { alert(j.error); b.disabled = false; return; }
+      state.jobs = [...(j.jobs || []), ...state.jobs]; state.tab = "run"; render(); wakeSync();
+      document.getElementById("jobs-card")?.scrollIntoView({behavior: "smooth", block: "start"});
+    } catch (e) { alert("The app did not answer; is its window still open? " + e); b.disabled = false; }
+  };
+  card.append(el("div", {class: "form-row", style: "justify-content:flex-start; margin-bottom: 8px"}, b));
+  return card;
+}
+// ---------- setup: this computer's data folder ----------
+function viewSetup(main) {
+  const S = SETUP(), first = !!S.needed;
+  const card = el("div", {class: "card"}, el("h2", {}, first ? "Where are the study files?" : "Change the data folder"),
+    el("p", {class: "note"}, "Choose the folder that holds the shared study files: dfHourly2025.csv, 2025BehaviorAgentProbabilities.csv, 2025DecisionTiming.csv, 2025SurveyData.csv and their 2024 counterparts. They are read on this computer only; nothing is uploaded."));
+  const inp = el("input", {type: "text", class: "path", value: state.setupPath ?? (S.data_root || S.suggestion || ""), "aria-label": "Data folder",
+    placeholder: "e.g. D:\\Share with Jack   or   /Users/you/Box/Share with Jack"});
+  inp.oninput = () => { state.setupPath = inp.value; };
+  const btn = el("button", {class: "btn primary", type: "button"}, "Check this folder");
+  const out = el("div", {});
+  const go = async () => {
+    btn.disabled = true; out.replaceChildren(el("p", {class: "note"}, "Checking the files (their column names only)…"));
+    try {
+      const j = await (await fetch("/api/setup", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({data_root: inp.value})})).json();
+      if (j.error) { state.setupResult = null; out.replaceChildren(el("p", {class: "bad"}, cap(j.error) + ".")); return; }
+      state.setupResult = j; out.replaceChildren(setupResult(j));
+    } catch (e) { out.replaceChildren(el("p", {class: "bad"}, "The app did not answer; is its window still open? " + e)); }
+    finally { btn.disabled = false; }
+  };
+  btn.onclick = go; inp.onkeydown = ev => { if (ev.key === "Enter") go(); };
+  card.append(el("div", {class: "setup-row"}, inp, btn));
+  if (first && S.suggestion && state.setupPath == null) card.append(el("p", {class: "note"}, "Study files were found in the folder filled in above. Check it, or paste another folder."));
+  card.append(el("details", {}, el("summary", {}, "How to copy a folder's path"),
+    el("ul", {class: "prose"}, el("li", {}, "Windows: in File Explorer, hold Shift, right-click the folder and choose Copy as path."),
+      el("li", {}, "Mac: in Finder, right-click the folder, hold Option and choose Copy “…” as Pathname."))));
+  if (!first) { const c = el("button", {class: "btn", type: "button"}, "Cancel"); c.onclick = () => { state.tab = "about"; render(); }; card.append(el("div", {style: "margin: 8px 0"}, c)); }
+  if (state.setupResult) out.append(setupResult(state.setupResult));
+  card.append(out);
+  main.append(card);
+}
+function setupResult(j) {
+  const box = el("div", {});
+  Object.entries(j.report || {}).sort((a, b) => b[0] - a[0]).forEach(([c, r]) => {
+    box.append(el("div", {class: "sub3"}, `${c}: ${r.status}`),
+      el("div", {class: "scroll"}, el("table", {}, el("tbody", {}, r.files.map(f => el("tr", {}, el("td", {}, f.kind), el("td", {class: f.state === "ok" ? "" : (f.optional && f.state.startsWith("optional") ? "cov" : "bad")}, f.state),
+        el("td", {}, f.path), el("td", {class: "cov"}, [...(f.missing.length ? ["lacks " + f.missing.join(", ")] : []), ...f.notes].join("; "))))))));
+  });
+  const found = Object.values(j.report || {}).some(r => r.files.some(f => !f.optional && f.state !== "NOT FOUND"));
+  if (found) (j.notes || []).forEach(n => box.append(el("p", {class: "note"}, n)));
+  if (j.saved) {
+    const cont = el("button", {class: "btn primary", type: "button"}, "Continue"); cont.onclick = () => location.reload();
+    box.append(el("p", {}, `Saved: this computer reads the study files from ${j.data_root}. ${[...j.ready].sort().reverse().join(" and ")} can run.`), cont);
+  } else box.append(el("p", {class: "bad"}, "No cohort can run from this folder yet. Fix the files marked above, or choose another folder."));
+  return box;
+}
+// ---------- Run: who responds ----------
+const CATALOG = () => DATA.moderator_catalog || {context: [], baseline: [], survey: {}};
+const formCohort = () => String(runForm.cohort || state.cohort);
+function coverage(name, cohort) { const c = (CATALOG().survey[cohort] || []).find(x => x.name === name); return c ? c.coverage : 0; }
+function defaultMods(cohort) { const C = CATALOG(); return [...C.context.map(([k]) => k), ...C.baseline.map(([k]) => k).filter(k => coverage(k, cohort) > 0)]; }
+function whoSection() {
+  const C = CATALOG(), cohort = formCohort();
+  if (!runForm.modsTouched || runForm.modsCohort !== cohort) { if (!runForm.modsTouched) runForm.moderators = defaultMods(cohort); runForm.modsCohort = cohort; }
+  runForm.extra = runForm.extra || [];
+  const on = el("input", {type: "checkbox", checked: !!runForm.who, "aria-label": "Also estimate who responds"});
+  const sec = el("div", {class: "who-sec", "aria-disabled": runForm.who ? "false" : "true"});
+  on.onchange = () => { runForm.who = on.checked; sec.setAttribute("aria-disabled", on.checked ? "false" : "true"); };
+  const box = (k, label, cov) => { const c = el("input", {type: "checkbox", checked: runForm.moderators.includes(k), "aria-label": label});
+    c.onchange = () => { runForm.modsTouched = true; runForm.moderators = c.checked ? [...runForm.moderators, k] : runForm.moderators.filter(x => x !== k); };
+    return el("label", {}, c, label, cov == null ? null : el("span", {class: "cov"}, cov > 0 ? `${Math.round(100 * cov)}%` : `no ${cohort} values`)); };
+  sec.append(el("div", {class: "form-sec"}, "Context the day before"), el("div", {class: "checks"}, C.context.map(([k, l]) => box(k, l))),
+    el("div", {class: "form-sec"}, "Baseline survey"), el("div", {class: "checks"}, C.baseline.map(([k, l]) => box(k, l, coverage(k, cohort)))));
+  // any other baseline (wave 0) survey column, picked from the cohort's survey file
+  const named = new Set([...C.context, ...C.baseline].map(([k]) => k));
+  const avail = (C.survey[cohort] || []).filter(x => !named.has(x.name));
+  const dl = el("datalist", {id: "survey-cols"}, avail.map(x => el("option", {value: x.name}, `${Math.round(100 * x.coverage)}% answered`)));
+  const inp = el("input", {type: "text", list: "survey-cols", placeholder: "e.g. hours0, sleepAve0, SigOther0", "aria-label": "Add a baseline survey column"});
+  const chips = el("div", {class: "chips"});
+  const drawChips = () => chips.replaceChildren(...runForm.extra.map(k => { const x = el("button", {type: "button", "aria-label": `Remove ${k}`}, "×");
+    x.onclick = () => { runForm.extra = runForm.extra.filter(v => v !== k); drawChips(); };
+    return el("span", {class: "chip"}, k, el("span", {class: "cov"}, `${Math.round(100 * coverage(k, cohort))}%`), x); }));
+  const msg = el("span", {class: "cov"});
+  const add = () => { const names = inp.value.split(/[,;\s]+/).filter(Boolean); const bad = names.filter(n => !avail.some(x => x.name === n) && !named.has(n));
+    if (bad.length) { msg.textContent = `${bad.join(", ")}: not a baseline survey column with ${cohort} values.`; return; }
+    runForm.extra = [...new Set([...runForm.extra, ...names.filter(n => !named.has(n))])]; names.filter(n => named.has(n) && !runForm.moderators.includes(n)).forEach(n => runForm.moderators.push(n));
+    inp.value = ""; msg.textContent = ""; drawChips(); };
+  inp.onkeydown = ev => { if (ev.key === "Enter") { ev.preventDefault(); add(); } };
+  const addBtn = el("button", {class: "btn", type: "button"}, "Add"); addBtn.onclick = add;
+  drawChips();
+  sec.append(el("div", {class: "form-sec"}, "More baseline survey columns"), dl, el("div", {class: "form-row", style: "justify-content:flex-start"}, inp, addBtn, msg), chips,
+    el("p", {class: "note"}, `Any baseline survey column with ${cohort} values (${avail.length} more; start typing to search). Percentages are the share of survey respondents who answered. Each characteristic is analysed on the decisions where it is recorded. Who responds always uses DR-WCLS with the outcome model chosen below.`));
+  return el("div", {}, el("div", {class: "form-sec"}, "Who responds"),
+    el("div", {class: "checks"}, el("label", {}, on, "For the questions above, also estimate how the effect changes with each characteristic, and how much it varies between people")), sec);
+}
+async function submitRun(btn) {
+  const body = {...runForm, cohort: runForm.cohort || state.cohort, device: runForm.device || state.device, apple_source: runForm.apple_source || state.apple,
+                extra_moderators: (runForm.extra || []).join(",")};
+  delete body.extra; delete body.modsTouched; delete body.modsCohort;
+  const rng = (DATA.date_ranges || {})[String(body.cohort)];
+  if (rng && body.date_from && body.date_from <= rng[0]) delete body.date_from;
+  if (rng && body.date_to && body.date_to >= rng[1]) delete body.date_to;
+  btn.disabled = true;
+  try {
+    const r = await fetch("/api/run", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+    const j = await r.json();
+    if (j.error) { alert(j.error); return; }
+    state.cohort = +body.cohort; state.device = body.device; state.apple = body.apple_source;
+    state.runMsg = `Queued “${j.label}”: ${j.runs} runs. It appears under Runs below.`;
+    state.jobs = [j, ...state.jobs.filter(x => x.id !== j.id)];
+    delete runForm.label;
+    render(); wakeSync();
+    document.getElementById("jobs-card")?.scrollIntoView({behavior: "smooth", block: "start"});
+  } catch (e) { alert("The app did not answer; is it still running? " + e); }
+  finally { btn.disabled = false; }
+}
+async function showJob(j, tab) {
+  if (j.run_ids && j.run_ids.some(id => !E.some(r => r.run_id === id))) { try { await refreshData(); } catch (e) { /* show what is loaded */ } }
+  state.cohort = +j.cohort; state.device = j.device; state.apple = j.apple_source || "watch_then_phone";
+  if (tab === "who") {
+    const r6 = E.find(r => j.run_ids.includes(r.run_id) && isWho(r));
+    state.who = {analysis: r6 ? r6.config_name : j.label + " (Q6)"};
+  } else state.ex = {runs: j.run_ids, runsLabel: j.label, term: "effect"};
+  state.tab = tab; render(); window.scrollTo(0, 0);
+}
+function jobsCard() {
+  const jc = el("div", {class: "card", id: "jobs-card"}, el("h2", {}, "Runs"), el("p", {class: "note"}, "Runs started while the app has been open. Results appear in every tab as soon as each run is stored."));
+  if (!state.jobs.length) jc.append(el("div", {class: "empty"}, "No runs started in this session."));
+  state.jobs.forEach(j => {
+    const ready = j.kind !== "refresh" && (j.status === "done" || (j.stored || 0) > 0);
+    const isStd = j.kind === "standard";
+    const view = el("button", {class: "btn", type: "button", disabled: !ready}, isStd ? "Show answers" : "Show results");
+    view.onclick = isStd ? () => { state.cohort = +j.cohort; state.device = "combined"; state.tab = "answers"; render(); window.scrollTo(0, 0); } : () => showJob(j, "explorer");
+    const btns = el("div", {style: "display:flex; gap:8px"}, view);
+    if (j.who) { const w = el("button", {class: "btn", type: "button", disabled: !ready}, "Who responds"); w.onclick = () => showJob(j, "who"); btns.append(w); }
+    const where = isStd ? "" : j.cohort ? ` · ${j.cohort} · ${DEVNAME[j.device] || j.device}${j.device === "apple" && j.apple_source === "watch_only" ? " (watch only)" : ""}` : "";
+    const prog = j.status === "running" ? ` · ${j.stored || 0} of ${j.runs} stored` : ` · ${j.runs} runs`;
+    jc.append(el("div", {class: "job"}, el("div", {}, el("span", {class: "st " + j.status}, cap(j.status)), ` · ${j.label}${where}${prog}${j.seconds != null ? " · " + j.seconds + " s" : ""}`), btns,
+      el("div", {class: "log"}, (j.log || []).slice(-4).join("\n"))));
+  });
+  return jc;
+}
+function savedCard() {
+  const custom = [...new Set(E.filter(r => r.family !== "primary" && r.family !== "q6").map(r => r.config_name))].sort().reverse();
+  const sc = el("div", {class: "card", id: "saved-card"}, el("h2", {}, "Saved analyses"), el("p", {class: "note"}, "Analyses run from this tab, newest first, kept in the results store. The primary specification and the standing question 6 runs are not listed."));
+  if (!custom.length) sc.append(el("div", {class: "empty"}, "None yet."));
+  custom.forEach(name => {
+    const rows = E.filter(r => r.config_name === name), r0 = rows[0], who = rows.some(isWho);
+    const ids = [...new Set(rows.map(r => r.run_id))];
+    const show = el("button", {class: "btn", type: "button"}, who ? "Who responds" : "Show");
+    show.onclick = () => showJob({run_ids: ids, label: name, cohort: r0.cohort, device: r0.device, apple_source: r0.apple_source}, who ? "who" : "explorer");
+    const rm = el("button", {class: "btn", type: "button"}, "Remove"); rm.onclick = async () => {
+      if (!confirm(`Remove the saved analysis "${name}"?`)) return;
+      await fetch("/api/delete", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({config_name: name})});
+      await refreshData(); render(); };
+    const olderRun = (DATA.runs || []).some(r => r.config_name === name && r.older_data);
+    sc.append(el("div", {class: "job"}, el("div", {}, el("span", {class: "st"}, name), ` · ${r0.cohort} · ${DEVNAME[r0.device] || r0.device}${r0.device === "apple" && r0.apple_source === "watch_only" ? " (watch only)" : ""}${dateTxt(r0) ? " · " + dateTxt(r0).replace("Decisions ", "") : ""} · ${rows.length} estimate${rows.length === 1 ? "" : "s"}${olderRun ? " · earlier data files" : ""}`), el("div", {style: "display:flex; gap:8px"}, show, rm)));
+  });
+  return sc;
+}
+// ---------- keeping the page in step with the results store ----------
+// The page asks the app every few seconds (every 1.2 s while a run is queued or running) for its jobs and a stamp that
+// changes whenever results are stored or removed, here or by `ihs-causal run` in a terminal; a new stamp reloads the
+// results and redraws. A failed request is simply retried, so the page cannot stop listening.
+let wake = null;
+const wakeSync = () => { if (wake) wake(); };
+async function refreshData() {
+  state.loading = true; renderSub();
+  try {
+    const r = await fetch("/api/payload"); if (!r.ok) throw new Error("payload " + r.status);
+    DATA = await r.json(); E = DATA.estimates;
+  } finally { state.loading = false; renderSub(); }
+}
+function redraw(dataChanged) {
+  if (state.tab === "setup") return;          // keep the folder being typed
+  if (state.tab !== "run") { if (dataChanged) render(); return; }
+  // on the Run tab, keep the form (and whatever is being typed) and replace the lists only
+  document.getElementById("jobs-card")?.replaceWith(jobsCard());
+  document.getElementById("standard-card")?.replaceWith(standardCard());
+  if (dataChanged) { document.getElementById("saved-card")?.replaceWith(savedCard()); renderChrome(); }
+}
+async function syncOnce() {
+  const r = await fetch("/api/jobs"); if (!r.ok) throw new Error("jobs " + r.status);
+  const s = await r.json();
+  const jobsChanged = JSON.stringify(s.jobs) !== JSON.stringify(state.jobs);
+  state.jobs = s.jobs;
+  let dataChanged = false;
+  if (s.stamp !== DATA.results_stamp) { await refreshData(); dataChanged = true; }
+  if (dataChanged || jobsChanged) redraw(dataChanged);
+  return s.jobs.some(j => j.status === "queued" || j.status === "running");
+}
+async function syncLoop() {
+  for (;;) {
+    let active = false;
+    try { active = await syncOnce(); } catch (e) { /* the app is busy or restarting: try again shortly */ }
+    await new Promise(res => { wake = res; setTimeout(res, active ? 1200 : (document.hidden ? 15000 : 4000)); });
+    wake = null;
+  }
+}
+
+// ---------- Diagnostics ----------
+function viewDiagnostics(main) {
+  const d = DATA.diagnostics.filter(r => r.cohort == state.cohort && r.device === state.device && (state.device !== "apple" || (r.apple_source || "watch_then_phone") === state.apple));
+  const card = el("div", {class: "card"}, el("h2", {}, `Samples and design checks · ${viewLabel()}`), el("p", {class: "note"}, "Rows lost at each step, the smallest randomization probability analysed, and, for DR-WCLS, how much of each arm's outcome the outcome model explains out of fold. 'No compared message possible' counts decisions where none of the compared messages could be sent, such as another domain's week in 2025; they are out of scope by design. 'Below probability floor' counts decisions removed because a compared arm was nearly impossible."));
+  if (!d.length) card.append(el("div", {class: "empty"}, "Nothing run for this cohort and device yet."));
+  else card.append(table(d, [
+    {h: "Analysis", f: r => r.config_name}, {h: "Outcome", f: r => OUT[r.outcome] || r.outcome}, {h: "Contrast", f: r => r.contrast_label + (r.positivity === "pairwise" && (r.arms_compared || []).length === 2 ? ` · ${r.arms_compared[1]}` : "")},
+    {h: "Candidate rows", num: 1, f: r => (r.rows_candidate || 0).toLocaleString()}, {h: "Outcome missing", num: 1, f: r => (r.rows_outcome_missing || 0).toLocaleString()},
+    {h: "No compared message possible", num: 1, f: r => r.rows_no_message_possible == null ? "–" : r.rows_no_message_possible.toLocaleString()},
+    {h: "Below probability floor", num: 1, f: r => (r.rows_dropped_low_probability || 0).toLocaleString()}, {h: "Analysed", num: 1, f: r => (r.rows_analysed || 0).toLocaleString()},
+    {h: "Arms dropped", f: r => (r.arms_dropped_small || []).join(", ") || "–"}, {h: "Min p", num: 1, f: r => fmt(r.min_p_observed, 3)},
+    {h: "Outcome model R² by arm", f: r => r.nuisance_r2_out_of_fold ? Object.entries(r.nuisance_r2_out_of_fold).map(([k, v]) => `${k} ${fmt(v, 2)}`).join("; ") : "–"}], true));
+  main.append(card);
+}
+
+// ---------- About ----------
+function viewAbout(main) {
+  const d = DATA.defaults || {}, keep = d.keep || {}, win = d.window || {};
+  const inputs = {}; DATA.runs.forEach(r => Object.entries(r.inputs || {}).forEach(([k, v]) => { inputs[`${r.cohort} ${k}`] = v; }));
+  const li = (...items) => el("ul", {}, items.map(t => el("li", {}, t)));
+  const p = el("div", {class: "card prose"});
+  const folder = [];
+  if (SERVE && SETUP().data_root) {
+    const ch = el("button", {class: "btn", type: "button"}, "Change…");
+    ch.onclick = () => { state.tab = "setup"; state.setupPath = undefined; state.setupResult = undefined; render(); };
+    folder.push(el("h3", {}, "Data folder"), el("div", {class: "form-row", style: "justify-content:flex-start"}, el("code", {}, SETUP().data_root), ch));
+  }
+  p.append(el("h2", {}, "About these results"), ...folder,
+    el("h3", {}, "What is estimated"),
+    el("p", {}, "Causal excursion effects from the micro-randomized trials: the difference in the next day's outcome between receiving a message (or a kind of message) and not, at decisions where both were possible, averaged over participants and days. Randomization probabilities are known from the study design. The 2024 and 2025 cohorts are analysed separately and never pooled."),
+    el("h3", {}, "The day after a decision"),
+    el("p", {}, `Each decision's window runs from the message (or the time a message would have gone out) to the next day's decision. A window counts only if it is a day long: ${win.span_min ?? 20} to ${win.span_max ?? 28} hours. History covariates come from the previous day's window.`),
+    el("p", {}, "The Run tab can restrict an analysis to a range of decision dates, for example to compare early and late months of the study year. History covariates still come from the day before the first date."),
+    el("h3", {}, "Which days are kept"),
+    el("p", {}, "A day is kept when there is evidence the device was measuring, never because the outcome itself was non-zero."),
+    li(`Steps: an hour is observed when the device shows heart rate or a positive step count (Garmin writes zeros in every hour, so a zero is not evidence of wear); a blank step count in an observed hour is a real zero. A day is kept with at least ${keep.steps_min_observed_hours ?? 10} observed hours. People with only an iPhone have no heart-rate signal, so for them "observed" means "has steps", a weaker measure; device type stays in the outcome model.`,
+       `Sleep: the unit is the night. A day is kept when a sleep record exists in it, and the outcome is minutes asleep. A night shorter than ${keep.sleep_short_night_minutes ?? 180} minutes is kept only if the device was observed for at least ${Math.round(100 * (keep.sleep_night_wear_min ?? 0.67))}% of the overnight hours (${keep.night_start_hour ?? 22}:00 to ${keep.night_end_hour ?? 7}:00 local time), so cut-off records are not read as short sleep. No sleep record means missing, not zero.`,
+       "Mood: a day is kept when it holds a response; the outcome is the mean response. Response rates fall over the study year, which the Diagnostics tab shows by analysis."),
+    el("h3", {}, "Devices"),
+    li("Combined: each person contributes their main device, the one among Fitbit, Garmin and Apple with the most observed hours. Mood is kept for everyone, including people without a wearable.",
+       "Apple, Garmin, Fitbit: that device for everyone who has it. Mood is restricted to the same people, so each device view describes one group of participants. A person with two devices appears in both views.",
+       "Apple data: 'watch, else phone' uses the Apple Watch for each hour and the iPhone where the watch has nothing; 'watch only' uses the watch alone. The share of observed hours from the watch is part of the outcome model."),
+    el("h3", {}, "Estimators"),
+    el("p", {}, "DR-WCLS: an outcome model is fitted on other participants' data (5-fold cross-fitting by participant) and combined with the known probabilities in a doubly robust pseudo-outcome. WCLS is available for comparison. Standard errors are clustered by participant. Simultaneous intervals cover every effect within one question at once (multiplier bootstrap)."),
+    el("h3", {}, "Low probabilities"),
+    el("p", {}, `A decision is left out when a compared arm had a probability below ${d.min_prob ?? 0.001} at that decision: an effect cannot be estimated where the message was nearly impossible, and a tiny probability gives one decision a huge weight. Arms with fewer than ${d.min_arm_rows ?? 200} decisions are left out. In comparisons with several arms (strategies, message types) each arm is compared with no message on its own, and the floor checks only those two probabilities, so a decision where some other message was nearly impossible still counts. The Run tab can instead check every arm at once, as in Jack's notebook. This matters most in 2025: given a send, the agents chose a message type in proportion to its predicted benefit with no floor, and in sleep and step weeks the weights settled on one agent that made some types almost impossible. The Diagnostics tab shows how many decisions each rule removed.`),
+    el("h3", {}, "Message types"),
+    el("p", {}, "The nine message types are the strategies with and without the participant's own data. For 2025 their probabilities come from the agent. For 2024 they are rebuilt from the message pools, a uniform draw over core messages not yet delivered; summed over domains and over data display they reproduce the published probabilities exactly. Message types have their own simultaneous intervals, separate from the strategies."),
+    el("h3", {}, "Who responds"),
+    el("p", {}, "Moderation: the effect's change per standard deviation of each characteristic, with false-discovery-rate q-values. Variation between people: each person's study weeks are split alternately into two halves; because messages are randomized day by day, the agreement of the two halves across people measures how much true effects differ, tested with a sign-flip test."),
+    el("h3", {}, "Data notes"),
+    li(...Object.entries(DATA.notes || {}).map(([k, v]) => `${k}: ${v}`)),
+    el("h3", {}, "Data versions"),
+    el("p", {}, "Every stored analysis records the files it was made from. When a file is updated, analyses made from the earlier file are flagged at the top of the page, and the button there (or ihs-causal refresh) reruns them with the same settings on the current files."),
+    Object.keys(DATA.current_inputs || {}).length
+      ? table(Object.entries(DATA.current_inputs).flatMap(([c, v]) => Object.entries(v.inputs).map(([k, sha]) => ({c, k, sha, file: (v.files || {})[k] || "",
+          n: DATA.runs.filter(r => String(r.cohort) === c && (r.inputs || {})[k] === sha).length}))),
+          [{h: "Cohort", f: r => r.c}, {h: "Input", f: r => r.k}, {h: "File", f: r => r.file.split(/[\\/]/).slice(-2).join("/")}, {h: "SHA-256", f: r => r.sha.slice(0, 16) + "…"}, {h: "Analyses made from it", num: true, f: r => r.n.toLocaleString()}], true)
+      : Object.keys(inputs).length ? table(Object.entries(inputs).map(([k, v]) => ({k, v})), [{h: "Input", f: r => r.k}, {h: "SHA-256", f: r => r.v.slice(0, 16) + "…"}]) : el("p", {}, "–"),
+    el("p", {class: "sub"}, `Generated ${DATA.generated} by ihs-causal ${DATA.version}.`));
+  main.append(p);
+}
+
+// ---------- shell ----------
+const TABS = [["answers", "Answers", viewAnswers], ["explorer", "Explorer", viewExplorer], ["who", "Who responds", viewWho], ["robustness", "Robustness", viewRobustness], ["run", "Run", viewRun], ["diagnostics", "Diagnostics", viewDiagnostics], ["about", "About", viewAbout]];
+function seg(label, choices, current, onPick) {
+  return el("div", {class: "seg", role: "group", "aria-label": label}, choices.map(([v, l]) => { const b = el("button", {type: "button", "aria-pressed": String(current) === String(v)}, l); b.onclick = () => onPick(v); return b; }));
+}
+function olderNote(older) {
+  const by = {}; older.forEach(r => { by[r.cohort] = (by[r.cohort] || 0) + 1; });
+  const box = el("div", {class: "datanote"}, `${older.length.toLocaleString()} stored ${older.length === 1 ? "analysis was" : "analyses were"} made from earlier data files (${Object.entries(by).map(([c, n]) => `${c}: ${n.toLocaleString()}`).join(", ")}). Their results are still shown. `);
+  if (SERVE) {
+    const b = el("button", {class: "btn", type: "button"}, "Rerun them on the current files");
+    b.onclick = async () => {
+      b.disabled = true;
+      const j = await (await fetch("/api/refresh", {method: "POST", headers: {"Content-Type": "application/json"}, body: "{}"})).json();
+      if (j.error) { alert(j.error); b.disabled = false; return; }
+      state.tab = "run"; render(); wakeSync(); };
+    box.append(b);
+  } else box.append("Run ihs-causal refresh to redo them.");
+  return box;
+}
+function render() {
+  hideTip();
+  renderChrome();
+  const main = document.getElementById("main"); main.replaceChildren();
+  (state.tab === "setup" ? viewSetup : TABS.find(t => t[0] === state.tab)[2])(main);
+}
+function renderChrome() {
+  if (state.tab === "setup") { ["controls", "datanote", "tabs"].forEach(id => document.getElementById(id).replaceChildren()); renderSub(); return; }
+  const controls = document.getElementById("controls");
+  controls.replaceChildren(
+    seg("Cohort", [[2025, "2025"], [2024, "2024"]], state.cohort, v => { state.cohort = +v; state.ex = {}; if (!runForm.cohort) { delete runForm.date_from; delete runForm.date_to; } render(); }),
+    seg("Device", DEVICES, state.device, v => { state.device = v; state.ex = {}; render(); }),
+    ...(state.device === "apple" ? [seg("Apple data", [["watch_then_phone", "Watch + phone"], ["watch_only", "Watch only"]], state.apple, v => { state.apple = v; render(); })] : []),
+    (() => { const b = el("button", {class: "icon-btn", type: "button", "aria-label": "Switch light or dark theme"}, "Theme"); b.onclick = () => {
+      const cur = document.documentElement.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark"); }; return b; })());
+  const note = (DATA.notes || {})[String(state.cohort)];
+  const older = (DATA.runs || []).filter(r => r.older_data);
+  document.getElementById("datanote").replaceChildren(...(note ? [el("div", {class: "datanote"}, `${state.cohort} data: ${note}`)] : []),
+    ...(older.length ? [olderNote(older)] : []));
+  document.getElementById("tabs").replaceChildren(...TABS.map(([k, l]) => { const b = el("button", {role: "tab", type: "button", "aria-selected": state.tab === k}, l); b.onclick = () => { state.tab = k; render(); if (k === "run") wakeSync(); }; return b; }));
+  renderSub();
+}
+function renderSub() {
+  if (state.tab === "setup") { document.getElementById("sub").textContent = SETUP().needed ? "First start on this computer" : "Data folder"; return; }
+  const n = E.filter(inView).length;
+  document.getElementById("sub").textContent = `${n.toLocaleString()} estimates for ${viewLabel()} · ` +
+    (SERVE ? (state.loading ? "loading new results…" : "live, updated " + DATA.generated.slice(11, 16)) : "generated " + DATA.generated);
+}
+let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (state.tab !== "run" && state.tab !== "setup") render(); }, 150); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) wakeSync(); });
+render();
+if (SERVE) syncLoop();
+</script>
+</body>
+</html>

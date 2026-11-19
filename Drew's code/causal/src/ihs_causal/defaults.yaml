@@ -1,0 +1,31 @@
+# Package defaults: the primary specification. A configuration file's `base` is merged over this, and `sweep` varies any
+# key. Keep rules and devices are explained in src/ihs_causal/data/features.py and in the viewer's About tab.
+cohort: 2025
+device: combined                # combined, apple, garmin or fitbit
+apple_source: watch_then_phone  # watch_then_phone or watch_only
+prob_scope: marginal            # 2025 only: probability over agent selection (marginal) or the selected agent's own (selected)
+window:
+  name: next_decision           # from one day's decision to the next; alternative: fixed (post_start_h, post_end_h, pre_len_h)
+  span_min: 20                  # a window must be a day long: 20 to 28 hours
+  span_max: 28
+keep:
+  steps_min_observed_hours: 10  # steps kept with at least this many hours in which the device shows heart rate or steps
+  sleep_short_night_minutes: 180   # a night shorter than this is kept only if the device was worn overnight
+  sleep_night_wear_min: 0.67    # share of the overnight hours with the device observed
+  night_start_hour: 22
+  night_end_hour: 7
+outcome: steps                  # mood, steps or sleep
+contrast: any_vs_none
+date_from: null                 # first decision date analysed (YYYY-MM-DD, inclusive); null = start of the study year
+date_to: null                   # last decision date analysed; null = end of the study year
+min_prob: 0.001
+min_arm_rows: 200
+positivity: pairwise            # multi-arm contrasts: min_prob checks only the reference and the arm compared (joint: every arm, as in Jack's notebook)
+controls: [Mood_pre, log_steps_pre, sleep_minutes_pre, t, PHQtot0]
+nuisance: [Mood_pre, Mood_sd_pre, Mood_n_pre, log_steps_pre, sleep_minutes_pre, hr_avg_pre, RHR_pre, observed_hours_pre,
+           watch_share_pre, device_is_fitbit, device_is_garmin, t, Age, Sex, depr0, PHQtot0, GADtot0, Neu0_published, SLE0]
+moderators: []
+estimator:
+  name: drwcls                  # drwcls or wcls (questions 1 to 5); drwcls_hetero (question 6)
+  learner: ridge                # ridge (fast default) or mean
+  folds: 5

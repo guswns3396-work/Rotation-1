@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ihs-causal"
+version = "0.2.1"
+description = "Fast, modular causal excursion-effect analysis for the IHS micro-randomized trials"
+readme = "README.md"
+requires-python = ">=3.9"
+dynamic = ["dependencies"]      # requirements.txt, which the Start launchers also install
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+ihs-causal = "ihs_causal.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ihs_causal = ["defaults.yaml", "viewer/template.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]        # the tests run from a fresh checkout, installed or not
