@@ -1,0 +1,5 @@
+# The standing analyses `ihs-causal reproduce` runs, by cohort, in this order, followed by the static snapshot.
+# Runs already stored from the same data files are skipped (--force recomputes them). A cohort whose files are not on
+# this machine is skipped. Add or remove configuration files here; paths are relative to this folder.
+2025: [primary_2025.yaml, primary_2025_apple_watch.yaml, q6_2025.yaml]
+2024: [primary_2024.yaml, primary_2024_apple_watch.yaml, q6_2024.yaml]

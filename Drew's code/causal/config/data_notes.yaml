@@ -1,0 +1,13 @@
+# Data notes shown above each cohort's results. A note is tied to the file it describes by the start of that file's
+# SHA-256 (as `ihs-causal check` and the About tab show it), so it appears only where that file is in use. A plain text
+# under a cohort, instead of fingerprints, is shown whatever the files.
+2025:
+  "2df0f3e1131d": >-
+    Hourly data: the published November 17 file with mood at each survey's exact completion time
+    (Hourly_MoodCorrected_20261117), which ends the 4 to 8 hour mood offset; under independent review. Data for June 21
+    to 30, 2026 are thin.
+2024:
+  "c16bd124c02d": >-
+    Hourly data: Codex's November 17 rebuild (Apple Health rebuilt on the server, double-counted steps removed, Fitbit
+    brief wakes, Garmin rules) with mood at each survey's exact completion time (Hourly_MoodCorrected_20261117); under
+    independent review.

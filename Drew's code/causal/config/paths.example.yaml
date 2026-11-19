@@ -1,0 +1,18 @@
+# Where the study data are on this machine. `ihs-causal setup DATA_FOLDER` copies this file to config/paths.yaml with
+# data_root filled in; or copy it by hand. config/paths.yaml is per machine and is never committed.
+data_root: "/path/to/shared/folder"   # e.g. the repository's data/ folder, holding dfHourly2025.csv, ...
+work_dir: work                        # caches and results; a relative path is inside this project folder
+
+# Optional: read a file from somewhere other than its standard name in data_root. A relative path is inside data_root.
+# Keys: hourly, decisions, surveys, message_types (2024), timing (2025).
+# Every result records the SHA-256 of the files that made it, and `ihs-causal check` prints them, so two machines can
+# confirm they use the same files. `ihs-causal refresh` reruns analyses made from earlier files.
+files:
+  # The hourly files every current result uses (November 17, 2026): mood at each survey's exact completion time.
+  # Delete these lines once the reviewed files replace dfHourly2024.csv and dfHourly2025.csv in data_root.
+  2024:
+    hourly: Hourly_MoodCorrected_20261117/dfHourly2024.csv
+    # 2024 message-type probabilities, needed only for the 2024 message-type questions; staged under review:
+    # message_types: audit/CollaborativeAudit/Opus/Decisions2024/candidate/2024MessageTypeProbabilities.csv.gz
+  2025:
+    hourly: Hourly_MoodCorrected_20261117/dfHourly2025.csv
