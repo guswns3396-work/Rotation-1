@@ -59,6 +59,22 @@ def test_first_start_setup_page_then_standard_analyses(fresh):
     assert all(j["runs"] == 0 and j["status"] == "done" for j in again)
 
 
+def test_changing_the_folder_keeps_this_machines_own_file_settings(tmp_path):
+    from ihs_causal.paths import plan_paths, write_paths_file
+    proj, shared = make_project(tmp_path), write_shared_files(tmp_path / "shared", n_people=3, n_days=7)
+    staged = tmp_path / "audit" / "2024MessageTypeProbabilities.csv.gz"
+    staged.parent.mkdir()
+    staged.write_bytes(b"")
+    (proj / "config" / "paths.yaml").write_text(
+        f'data_root: "{shared.as_posix()}"\nwork_dir: work\nfiles:\n  2024:\n    message_types: "{staged.as_posix()}"\n'
+        f'    surveys: "gone/2024SurveyData.csv"\n', encoding="utf-8")
+    paths, files, notes = plan_paths(proj, shared)              # the Change button, same folder again
+    assert files[2024]["message_types"] == staged.as_posix()   # the staged file is kept
+    assert "surveys" not in files[2024] and any("gone/2024SurveyData.csv" in n for n in notes)
+    write_paths_file(proj, paths.data_root, files)
+    assert staged.as_posix() in (proj / "config" / "paths.yaml").read_text(encoding="utf-8")
+
+
 def test_setup_page_suggests_the_repository_data_folder(tmp_path):
     repo = tmp_path / "Rotation-1"
     proj = make_project(repo / "Drew's code")              # the package inside the repository, as in Jack's repo

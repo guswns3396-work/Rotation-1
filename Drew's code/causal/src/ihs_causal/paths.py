@@ -91,7 +91,18 @@ def plan_paths(project_dir: Path, data_root: Path) -> Tuple[Paths, Dict, List[st
             else:
                 notes.append(f"{c} {kind}: {Path(str(rel)).as_posix()} is not in this folder, so the standard "
                              f"{FILES[int(c)][kind]} is read instead. Results can differ from those made with the other file.")
-    work = Path(str(example.get("work_dir", "work"))).expanduser()
+    # changing the folder on a machine already set up keeps its own file settings that still point at existing files
+    cur_path = project_dir / "config" / "paths.yaml"
+    current = load_yaml(cur_path) if cur_path.exists() else {}
+    for c, kinds in (current.get("files") or {}).items():
+        for kind, val in (kinds or {}).items():
+            p = Path(str(val)).expanduser()
+            if (p if p.is_absolute() else root / p).exists():
+                files.setdefault(int(c), {})[kind] = p.as_posix()
+                notes = [n for n in notes if not n.startswith(f"{c} {kind}:")]
+            else:
+                notes.append(f"{c} {kind}: the earlier setting {p.as_posix()} is not found from this folder and is dropped.")
+    work = Path(str(current.get("work_dir") or example.get("work_dir", "work"))).expanduser()
     work = work if work.is_absolute() else project_dir / work
     return Paths(data_root=root, work_dir=work, project_dir=project_dir, overrides=files), files, notes
 
@@ -99,8 +110,9 @@ def plan_paths(project_dir: Path, data_root: Path) -> Tuple[Paths, Dict, List[st
 def write_paths_file(project_dir: Path, data_root: Path, files: Dict) -> Path:
     """Write config/paths.yaml (see plan_paths) and return its path."""
     project_dir = Path(project_dir)
-    ex_path = project_dir / "config" / "paths.example.yaml"
-    work = (load_yaml(ex_path) if ex_path.exists() else {}).get("work_dir", "work")
+    ex_path, cur_path = project_dir / "config" / "paths.example.yaml", project_dir / "config" / "paths.yaml"
+    work = ((load_yaml(cur_path) if cur_path.exists() else {}).get("work_dir")
+            or (load_yaml(ex_path) if ex_path.exists() else {}).get("work_dir", "work"))
     lines = ["# This machine's data location, written by `ihs-causal setup` or the app's setup page. Never committed.",
              "# config/paths.example.yaml explains every option.",
              f'data_root: "{Path(data_root).as_posix()}"', f"work_dir: {work}"]

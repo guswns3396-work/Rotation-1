@@ -116,6 +116,7 @@ code { font-size: 12.5px; background: var(--wash); padding: 1px 4px; border-radi
 .sigkey { display: inline-block; width: 18px; height: 12px; border-radius: 3px; box-shadow: inset 0 0 0 2px var(--ink); vertical-align: -2px; }
 /* setup page and standard analyses */
 .bad { color: var(--bad); }
+.linkbtn { border: 0; background: none; padding: 0; font: inherit; color: var(--s1); cursor: pointer; text-decoration: underline; }
 input.path { flex: 1 1 auto; min-width: 0; width: 100%; font-size: 14px; padding: 7px 9px; }
 .setup-row { display: flex; gap: 10px; align-items: center; margin: 12px 0 6px; }
 .setup-row .btn { white-space: nowrap; flex: none; }
@@ -128,6 +129,7 @@ input.path { flex: 1 1 auto; min-width: 0; width: 100%; font-size: 14px; padding
     <div>
       <h1>IHS messaging study: causal effects</h1>
       <div class="sub" id="sub"></div>
+      <div class="sub" id="folder"></div>
     </div>
     <div class="controls" id="controls"></div>
   </header>
@@ -911,7 +913,17 @@ function renderChrome() {
   document.getElementById("tabs").replaceChildren(...TABS.map(([k, l]) => { const b = el("button", {role: "tab", type: "button", "aria-selected": state.tab === k}, l); b.onclick = () => { state.tab = k; render(); if (k === "run") wakeSync(); }; return b; }));
   renderSub();
 }
+function openSetup() { state.tab = "setup"; state.setupPath = undefined; state.setupResult = undefined; render(); window.scrollTo(0, 0); }
+function renderFolder() {
+  // which folder this computer reads the study files from, always in view, with a way to change it
+  const box = document.getElementById("folder");
+  if (!SERVE || state.tab === "setup" || !SETUP().data_root) { box.replaceChildren(); return; }
+  const ch = el("button", {class: "linkbtn", type: "button", "aria-label": "Change the folder the study files are read from"}, "Change");
+  ch.onclick = openSetup;
+  box.replaceChildren("Study files read from ", el("code", {}, SETUP().data_root), " · ", ch);
+}
 function renderSub() {
+  renderFolder();
   if (state.tab === "setup") { document.getElementById("sub").textContent = SETUP().needed ? "First start on this computer" : "Data folder"; return; }
   const n = E.filter(inView).length;
   document.getElementById("sub").textContent = `${n.toLocaleString()} estimates for ${viewLabel()} · ` +
