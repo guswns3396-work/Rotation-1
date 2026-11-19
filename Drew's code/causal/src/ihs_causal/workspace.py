@@ -20,7 +20,7 @@ from ihs_causal.data.features import CONTEXT, TRAITS, apply_rules, baseline_trai
 from ihs_causal.data.hourly import read_hourly
 from ihs_causal.paths import Paths, fingerprint
 
-VERSIONS = {"hourly": 1, "decisions": 3, "window_stats": 3}
+VERSIONS = {"hourly": 1, "decisions": 4, "window_stats": 3}
 
 
 class Workspace:

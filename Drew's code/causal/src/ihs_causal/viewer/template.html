@@ -811,12 +811,13 @@ async function syncLoop() {
 // ---------- Diagnostics ----------
 function viewDiagnostics(main) {
   const d = DATA.diagnostics.filter(r => r.cohort == state.cohort && r.device === state.device && (state.device !== "apple" || (r.apple_source || "watch_then_phone") === state.apple));
-  const card = el("div", {class: "card"}, el("h2", {}, `Samples and design checks · ${viewLabel()}`), el("p", {class: "note"}, "Rows lost at each step, the smallest randomization probability analysed, and, for DR-WCLS, how much of each arm's outcome the outcome model explains out of fold. 'No compared message possible' counts decisions where none of the compared messages could be sent, such as another domain's week in 2025; they are out of scope by design. 'Below probability floor' counts decisions removed because a compared arm was nearly impossible."));
+  const card = el("div", {class: "card"}, el("h2", {}, `Samples and design checks · ${viewLabel()}`), el("p", {class: "note"}, "Rows lost at each step, the smallest randomization probability analysed, and, for DR-WCLS, how much of each arm's outcome the outcome model explains out of fold. 'No compared message possible' counts decisions where none of the compared messages could be sent, such as another domain's week in 2025; they are out of scope by design. 'Probability not published' counts decisions whose randomization probability is blank in the data file, such as the 2025 decisions of September 4 to 27 made by fitted agents. 'Below probability floor' counts decisions removed because a compared arm was nearly impossible."));
   if (!d.length) card.append(el("div", {class: "empty"}, "Nothing run for this cohort and device yet."));
   else card.append(table(d, [
     {h: "Analysis", f: r => r.config_name}, {h: "Outcome", f: r => OUT[r.outcome] || r.outcome}, {h: "Contrast", f: r => r.contrast_label + (r.positivity === "pairwise" && (r.arms_compared || []).length === 2 ? ` · ${r.arms_compared[1]}` : "")},
     {h: "Candidate rows", num: 1, f: r => (r.rows_candidate || 0).toLocaleString()}, {h: "Outcome missing", num: 1, f: r => (r.rows_outcome_missing || 0).toLocaleString()},
     {h: "No compared message possible", num: 1, f: r => r.rows_no_message_possible == null ? "–" : r.rows_no_message_possible.toLocaleString()},
+    {h: "Probability not published", num: 1, f: r => r.rows_probability_missing == null ? "–" : r.rows_probability_missing.toLocaleString()},
     {h: "Below probability floor", num: 1, f: r => (r.rows_dropped_low_probability || 0).toLocaleString()}, {h: "Analysed", num: 1, f: r => (r.rows_analysed || 0).toLocaleString()},
     {h: "Arms dropped", f: r => (r.arms_dropped_small || []).join(", ") || "–"}, {h: "Min p", num: 1, f: r => fmt(r.min_p_observed, 3)},
     {h: "Outcome model R² by arm", f: r => r.nuisance_r2_out_of_fold ? Object.entries(r.nuisance_r2_out_of_fold).map(([k, v]) => `${k} ${fmt(v, 2)}`).join("; ") : "–"}], true));

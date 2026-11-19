@@ -123,16 +123,18 @@ def decisions_2025(path_behavior, path_timing, prob_scope: str = "marginal") -> 
     out["p_send"] = 1 - out["p_none"]
     for a in ARMS:
         out[f"p_arm_{a}"] = _num(df, f"{pre}{a}")
+    # another domain's week is an exact 0 even where a probability is not published (the September 2025 fitted
+    # decisions are blank), so such a decision counts as out of scope, not as a missing probability
     for d in DOMAINS:
-        in_week = (week_domain == d).astype(float)
-        out[f"p_dom_{d}"] = out["p_send"] * in_week
+        in_week = week_domain == d
+        out[f"p_dom_{d}"] = np.where(in_week, out["p_send"], 0.0)
         for s in STRATEGIES:
-            out[f"p_dom_{d}_{s}"] = sum(out[f"p_arm_{a}"] for a in ARMS if a.startswith(s) and not (s == "MI" and a.startswith("Mfn"))) * in_week
+            out[f"p_dom_{d}_{s}"] = np.where(in_week, sum(out[f"p_arm_{a}"] for a in ARMS if a.startswith(s) and not (s == "MI" and a.startswith("Mfn"))), 0.0)
     _derived_probabilities(out)
     for d in DOMAINS:
-        in_week = (week_domain == d).astype(float)
+        in_week = week_domain == d
         for a in ARMS:
-            out[f"p_type_{d}_{a}"] = out[f"p_arm_{a}"] * in_week
+            out[f"p_type_{d}_{a}"] = np.where(in_week, out[f"p_arm_{a}"], 0.0)
     out["cohort"] = 2025
     out["prob_scope"] = prob_scope
     return out

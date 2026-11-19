@@ -48,13 +48,16 @@ def _frame(df: pd.DataFrame, outcome: str, arm_masks: List[np.ndarray], arm_prob
     keep = (arm >= 0) & np.isfinite(y) & np.isfinite(P).all(axis=1) & (P >= min_prob).all(axis=1)
     for m in spec.get("moderators", []):   # moderator analyses use complete cases for the moderator, as in Jack's notebook
         keep &= np.isfinite(df[m].to_numpy(dtype=float))
-    # decisions where none of the compared messages could be sent (in 2025, another domain's week) are out of scope by
-    # design; they are counted apart from decisions removed by the probability floor
+    # Removed decisions are counted by reason: a probability not published (2025, September 4-27, the fitted decisions);
+    # none of the compared messages possible (2025, another domain's week: out of scope by design); below the floor
     cand = (arm >= 0) & np.isfinite(y)
-    no_message = (np.nan_to_num(P[:, 1:], nan=0.0) == 0).all(axis=1) if P.shape[1] > 1 else np.zeros(len(df), bool)
+    with np.errstate(invalid="ignore"):
+        no_message = cand & ((P[:, 1:] == 0).all(axis=1) if P.shape[1] > 1 else np.zeros(len(df), bool))
+        missing = cand & ~no_message & ~np.isfinite(P).all(axis=1)
+        low = cand & ~missing & ~no_message & ~(P >= min_prob).all(axis=1)
     info = {"arms_compared": list(arm_names), "rows_candidate": int((arm >= 0).sum()), "rows_outcome_missing": int(((arm >= 0) & ~np.isfinite(y)).sum()),
-            "rows_no_message_possible": int((cand & no_message).sum()),
-            "rows_dropped_low_probability": int((cand & ~no_message & ~(P >= min_prob).all(axis=1)).sum())}
+            "rows_probability_missing": int(missing.sum()), "rows_no_message_possible": int(no_message.sum()),
+            "rows_dropped_low_probability": int(low.sum())}
     # drop small arms (never the reference)
     min_rows = spec.get("min_arm_rows", 200)
     active = [0] + [k for k in range(1, len(arm_names)) if ((arm == k) & keep).sum() >= min_rows]

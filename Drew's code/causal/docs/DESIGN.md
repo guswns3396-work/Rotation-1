@@ -149,8 +149,11 @@ without refitting (cached per family).
 **Rows left out.** Arms with fewer than `min_arm_rows` = 200 decisions, and decisions where a compared arm had a
 probability below `min_prob` = 0.001. `positivity` says which probabilities the floor checks when a contrast has more
 than two arms: `pairwise` (default) checks only the reference and the arm compared, one frame per arm; `joint` checks
-every compared arm in one frame. The Diagnostics tab counts decisions where no compared message was possible (such as
-another domain's week in 2025) apart from decisions below the floor.
+every compared arm in one frame. The Diagnostics tab counts removed decisions by reason:
+- **No compared message possible:** for example, another domain's week in 2025. These are out of scope by design.
+- **Probability not published:** the probability is blank in the data file. Since the November 19, 2026 release this
+  covers the 20,448 decisions of September 4–27, 2025 made by fitted agents. They drop out of every comparison.
+- **Below the floor:** a compared arm's probability is under `min_prob`.
 
 **Probabilities.** 2025: by default each action's probability over the agent-selection step (`prob_scope: marginal`,
 the `p_marginal_*` columns); the selected agent's own distribution is a setting (`selected`). 2024: the file's
