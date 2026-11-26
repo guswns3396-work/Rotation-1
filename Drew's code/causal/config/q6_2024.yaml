@@ -1,0 +1,14 @@
+# Question 6, 2024 cohort: who responds. For any message and each message domain against no message: moderation by
+# context and baseline traits (per 1 SD), the SD of true person-level effects (alternating study weeks, sign-flip test),
+# and the share of between-person variation baseline traits explain. Every device; same windows and keep rules as primary.
+name: q6_2024
+base:
+  cohort: 2024
+  family: q6
+  estimator: {name: drwcls_hetero, learner: ridge, folds: 5, min_person_rows: 10, bootstrap: 400, permutations: 2000}
+  moderator_sweep: [Mood_pre, log_steps_pre, sleep_minutes_pre, t, Age, Sex, depr0, PHQtot0, GADtot0, Neu0_published, SLE0, EFE0]
+  baseline_traits: [Age, Sex, depr0, PHQtot0, GADtot0, Neu0_published, SLE0, EFE0]
+sweep:
+  device: [combined, apple, garmin, fitbit]
+  outcome: [mood, steps, sleep]
+  contrast: [any_vs_none, domain_vs_none]
