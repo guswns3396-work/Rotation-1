@@ -77,6 +77,7 @@ flowchart TD
 | [09 Moderators](09-moderators.md) | Every moderator in the report and the presentation: definition, timing against the decision, source, usual value, split, missing values |
 | [10 Analysis rules](10-analysis-rules.md) | Periods, cohorts and pooling, the minimum of 50 messages per arm, which decisions enter each comparison, missing moderators, the aggregate-only guard |
 | [11 Model](11-model.md) | The WCLS estimator, weights, centring, the estimand, influence-based standard errors, pooling, and the collinearity fix of engine 0.2.2 |
+| [12 Timeline of fixes](12-timeline-of-fixes.md) | What was done to the data, in date order from the September 2026 exports to the current files, with links into the notes above |
 
 ## Files the current results use
 
